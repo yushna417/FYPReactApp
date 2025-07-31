@@ -14,6 +14,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        MainTheme:"#253a6c",
         primary: {
           0: 'rgb(var(--color-primary-0)/<alpha-value>)',
           50: 'rgb(var(--color-primary-50)/<alpha-value>)',
@@ -174,6 +175,8 @@ module.exports = {
         body: undefined,
         mono: undefined,
         roboto: ['Roboto', 'sans-serif'],
+        potta: ["PottaOne"],
+        poppins:["Poppins"]
       },
       fontWeight: {
         extrablack: '950',
@@ -190,7 +193,8 @@ module.exports = {
         'soft-1': '0px 0px 10px rgba(38, 38, 38, 0.1)',
         'soft-2': '0px 0px 20px rgba(38, 38, 38, 0.2)',
         'soft-3': '0px 0px 30px rgba(38, 38, 38, 0.1)',
-        'soft-4': '0px 0px 40px rgba(38, 38, 38, 0.1)',
+        'soft-4': '0px 0px 40px rgba(38, 38, 38, 0.1)',        
+        'custom-dual': '21px 21px 42px #a4a4a4, -21px -21px 42px #ffffff',
       },
     },
   },
