@@ -1,48 +1,78 @@
-import { View, Text, Image, TouchableOpacity, SafeAreaView } from 'react-native';
-import { Button, ButtonText } from "@/components/ui/button"
+import { Button,  ButtonText } from "@/components/ui/button";
 import {
   FormControl,
   FormControlLabel,
   FormControlLabelText,
-} from "@/components/ui/form-control"
-import { Input, InputField, InputSlot} from "@/components/ui/input"
-import { VStack } from "@/components/ui/vstack"
-import React from 'react';
+} from "@/components/ui/form-control";
 import { HStack } from '@/components/ui/hstack';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { Input, InputField, InputSlot } from "@/components/ui/input";
+
 import {
   Radio,
   RadioGroup,
-} from "@/components/ui/radio"
+} from "@/components/ui/radio";
+import { VStack } from "@/components/ui/vstack";
+import { ILoginPayload } from '@/types/loginPayloadInterface';
+import { Role } from '@/types/userInterface';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, Text, TouchableOpacity } from 'react-native';
+import Toast from 'react-native-simple-toast'
+import { useAuth } from "@/context/useAuth";
+import { Alert } from "react-native";
 
 
-const YourApp = () => {
-  const [isInvalid, setIsInvalid] = React.useState(false)
-  const [inputValue, setInputValue] = React.useState("12345")
-  const [password, setPassword] = React.useState("");
+
+const login = () => {
+  const [loginData, setLoginData] = useState<ILoginPayload> ({
+    phone: '',
+    password: '',
+    role:'customer'
+  })
   const [showPassword, setShowPassword] = React.useState(false);
-  const [selectedRole, setSelectedRole] = React.useState("Customer");
   const navigation = useNavigation<any>();
+  const [isLoading, setIsloading] = useState(false);
+  const {login} = useAuth()
+  
 
-  const handleSubmit = () => {
-    if (inputValue.length < 12) {
-      setIsInvalid(true)
-    } else {
-      setIsInvalid(false)
+
+  const handleSubmit = async() => {
+    const { phone, password, role } = loginData;
+
+    if (!phone || phone.length < 9 || !password) {
+       Toast.show('Phone number must be at least 10 digits.', Toast.LONG, {
+          backgroundColor: '#253a6c',
+        });
+      return;
     }
-  }
+    
+    setIsloading(true)
+    try{
+      const loginPayload: ILoginPayload = {
+      phone: phone,
+      password: password,
+      role: role
+    };
+
+    await login(loginPayload);
+    } catch (error:any) {
+      Alert.alert('Login Failed', 'Invalid credentials');
+    } finally {
+      setIsloading(false);
+    }
+  };
+
   return (
     
     <SafeAreaView className='flex-col py-36 px-8 gap-y-8 font-poppins'>
         <MaterialIcons name="arrow-circle-left" size={50} color="#253a6c" className='-ms-2'
-        onPress={()=> navigation.navigate('SecondPage')} />
+        onPress={()=> navigation.navigate('OnBoardingPage')} />
         <Text className='text-4xl font-poppins font-extrabold text-[#253a6c]'>Login</Text>
       <VStack className="w-full rounded-md ">
         <FormControl
-          isInvalid={isInvalid}
           size="lg"
           isDisabled={false}
           isReadOnly={false}
@@ -54,21 +84,21 @@ const YourApp = () => {
             <FormControlLabelText>Sign in as....</FormControlLabelText>
           </FormControlLabel>
               <RadioGroup
-                value={selectedRole}
-                onChange={(val) => setSelectedRole(val)}
+                value={loginData.role}
+                onChange={(val) => setLoginData({ ...loginData, role:val as Role })}
                 className='border border-[#d5d4d4] h-14 rounded-xl flex items-center flex-row w-full mt-1'
               >
                 <HStack >
                   {/* Vendor Radio */}
                   <Radio
-                    value="Vendor"
+                    value="vendor"
                     className={`h-14 w-[50%] rounded-xl flex justify-center items-center ${
-                      selectedRole === "Vendor" ? "bg-[#253a6c]" : ""
+                      loginData.role === "vendor" ? "bg-[#253a6c]" : ""
                     }`}
                   >
                     <Text
                       className={`text-lg font-poppins ${
-                        selectedRole === "Vendor" ? "text-white" : "text-black"
+                        loginData.role === "vendor" ? "text-white" : "text-black"
                       }`}
                     >
                       Vendor
@@ -77,14 +107,14 @@ const YourApp = () => {
 
                   {/* Customer Radio */}
                   <Radio
-                    value="Customer"
+                    value="customer"
                     className={`h-14 w-1/2 rounded-xl flex justify-center items-center ${
-                      selectedRole === "Customer" ? "bg-[#253a6c]" : ""
+                      loginData.role === "customer" ? "bg-[#253a6c]" : ""
                     }`}
                   >
                     <Text
                       className={`text-lg font-poppins ${
-                        selectedRole === "Customer" ? "text-white" : "text-black"
+                        loginData.role === "customer" ? "text-white" : "text-black"
                       }`}
                     >
                       Customer
@@ -94,7 +124,6 @@ const YourApp = () => {
               </RadioGroup>
 
 
-          {/* Username */}
           <FormControlLabel className='mt-6 font-poppins'>
             <FormControlLabelText>Phone Number</FormControlLabelText>
           </FormControlLabel>
@@ -102,6 +131,9 @@ const YourApp = () => {
             <FontAwesome5 name="user-alt" size={18} color="#2b2b2c" />  
             <InputField placeholder="98********"            
               className="text-md ml-2"
+              value={loginData.phone}
+              onChangeText={(text) => setLoginData({ ...loginData, phone: text })}
+
             />
           </Input>
           
@@ -114,8 +146,8 @@ const YourApp = () => {
             <InputField
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
-              // value={password}
-              // onChangeText={(text) => setPassword(text)}
+              value={loginData.password}
+              onChangeText={(text) => setLoginData({ ...loginData, password: text })}
               className="text-md ml-2"
             />
             <InputSlot onPress={() => setShowPassword(!showPassword)} className='mr-1' >
@@ -130,8 +162,17 @@ const YourApp = () => {
             <Text className="text-sm text-[#253a6c] font-poppins">Forgot Password?</Text>
           </TouchableOpacity>
 
-        <Button className="w-full self-end mt-10 rounded-lg h-16 bg-[#243c6b]" size="md" onPress={handleSubmit}>
-          <ButtonText className='text-lg'>Login</ButtonText>
+               
+     
+    
+
+        <Button className="w-full flex-col self-end mt-10 rounded-lg h-16 bg-[#243c6b]" size="md" onPress={handleSubmit}>
+          <ButtonText className='text-lg'
+          onPress={handleSubmit}
+          disabled={isLoading}>
+           {isLoading ? 'Logging in...' : 'Login'}
+          </ButtonText>
+          
         </Button>
 
         <Text className='mt-4 font-poppins text-gray-400'>I am a new user. <Text className='text-[#253a6c]'
@@ -142,4 +183,4 @@ const YourApp = () => {
   );
 };
 
-export default YourApp;
+export default login;

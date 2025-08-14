@@ -1,5 +1,4 @@
 import {View, Alert, TouchableOpacity, SafeAreaView, Text} from 'react-native';
-import * as ImagePicker from 'expo-image-picker'
 import {
   FormControl,  
   FormControlLabel,
@@ -7,58 +6,47 @@ import {
 } from "@/components/ui/form-control"
 import { Input, InputField} from "@/components/ui/input"
 import { VStack } from "@/components/ui/vstack"
-import React, { useState, useImperativeHandle, forwardRef } from 'react';
+import React, { useImperativeHandle, forwardRef } from 'react';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Feather from '@expo/vector-icons/Feather';
-import Entypo from '@expo/vector-icons/Entypo';
-import { Button, ButtonText } from "@/components/ui/button"
-import { HStack } from '@/components/ui/hstack';
 
+import { IUser } from '@/types/userInterface';
+import Toast from 'react-native-simple-toast'
 
-const Step1 = forwardRef((props, ref) => {
-  const [name, setName] = useState("")
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+interface Step1Props {
+  data: IUser;
+  setData: React.Dispatch<React.SetStateAction<IUser>>;
+}
 
-  const requestPermissions = async () => {
-    const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
-    const mediaPermission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!cameraPermission.granted || !mediaPermission.granted) {
-      Alert.alert('Permission Required', 'Camera and Media permissions are required to upload images.');
-      return false;
-    }
-    return true;
-  };
-
-  const pickFromGallery = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImageUrl(result.assets[0].uri);
-    }
-  };
-
-  const takePhoto = async () => {
-    const hasPermission = await requestPermissions();
-    if (!hasPermission) return;
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImageUrl(result.assets[0].uri);
-    }
-  };
+const Step1 = forwardRef(({ data, setData }: Step1Props, ref) => {
   
+    useImperativeHandle(ref, () => ({
+    validate: () => {
+     
+      if (!data.full_name.trim()) {
+        Toast.show('Full name is required.', Toast.LONG, {
+          backgroundColor: '#253a6c',
+        });
+        return false;
+      }
+      if (!data.phone.trim()) {
+        Toast.show('Phone number is required.', Toast.LONG, {
+          backgroundColor: '#253a6c',
+        });
+        return false;
+      }
+      const digitsOnly = data.phone.replace(/\D/g, ''); 
+      if (digitsOnly.length < 9) {
+        Toast.show('Phone number must be at least 10 digits.', Toast.LONG, {
+          backgroundColor: '#253a6c',
+        });
+        return false;
+      }
+      return true;
+    },
+  }));
+ 
+
   return (
     
     <SafeAreaView className='flex-col py-8 justify-center gap-y-8 font-poppins'>
@@ -70,7 +58,7 @@ const Step1 = forwardRef((props, ref) => {
           isRequired={true}
         
         >
-          <View>
+          {/* <View>
             <FormControlLabel className='mt-6 '>
               <FormControlLabelText className='text-md font-poppins'>Profile</FormControlLabelText>
             </FormControlLabel>
@@ -90,7 +78,7 @@ const Step1 = forwardRef((props, ref) => {
             </HStack>
             
 
-          </View>
+          </View> */}
 
           <View>
             <FormControlLabel className='mt-6 '>
@@ -100,7 +88,8 @@ const Step1 = forwardRef((props, ref) => {
               <FontAwesome5 name="user-alt" size={18} color="#2b2b2c" />  
               <InputField placeholder="Ravi Paudel"            
                 className="text-md ml-2"
-                value={name}
+                value={data.full_name}
+                onChangeText={(text) => setData({ ...data, full_name: text })}
               />
             </Input>
           </View>
@@ -113,6 +102,8 @@ const Step1 = forwardRef((props, ref) => {
               <Feather name="phone" size={20} color="black" />
               <InputField placeholder="98*****"            
                 className="text-md ml-2"
+                value={data.phone}
+                onChangeText = {(text) => setData({...data, phone:text})}
               />
             </Input>
           </View>

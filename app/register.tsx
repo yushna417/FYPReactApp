@@ -1,29 +1,84 @@
-import React, { useState } from 'react';
-import { Text, View, Image, SafeAreaView } from 'react-native';
+import { IUser } from '@/types/userInterface';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
+import React, { useRef, useState } from 'react';
+import { Image, SafeAreaView, Text, View } from 'react-native';
 import Stepper from 'react-native-stepper-ui';
 import Step1 from './registrationSteps/step1';
 import Step2 from './registrationSteps/step2';
 import Step3 from './registrationSteps/step3';
 import Step4 from './registrationSteps/step4';
+import { useAuth } from '@/context/useAuth';
+import { Alert } from 'react-native';
 
-
-const content = [
-  <Step1 key="1" />,
-  <Step2 key="2" />,
-  <Step3 key="3" />,
-  <Step4 key="4" />,
-];
-
-const App = () => {
+const Register = () => {
   const [active, setActive] = useState(0);
   const navigation = useNavigation<any>();
+  const [registerData, setRegisterData] = useState<IUser>({
+    full_name :'',
+    phone:'',
+    role:"customer",
+    profile_image: "",
+    city:'',
+    password:'',
+  })
+  // const [isSubmitting, setIsSubmitting] = useState(false);
+  const { register } = useAuth();
+
+  const stepRefs = [useRef<any>(null), useRef<any>(null), useRef<any>(null), useRef<any>(null)];
+  
+  const content = [
+    <Step1 key="1" ref={stepRefs[0]} data={registerData} setData={setRegisterData} />,
+    <Step2 key="2" ref={stepRefs[1]} data={registerData} setData={setRegisterData} />,
+    <Step3 key="3" ref={stepRefs[2]} data={registerData} setData={setRegisterData} />,
+    <Step4 key="4" ref={stepRefs[3]} data={registerData} setData={setRegisterData} />,
+  ]
+
+  
+  const handleNext = async () => {
+    const isValid = await stepRefs[active].current?.validate();
+    if (isValid) {
+      setActive((prev) => prev + 1);
+    }
+  };
+
+// In your register component
+const handleRegister = async () => {
+  const isValid = await stepRefs[3].current?.validate();
+  if (!isValid) return;
+
+  try {
+    // Remove profile_image if null or empty string
+    const { profile_image, ...safeData } = registerData;
+    const finalData = profile_image ? { ...registerData } : safeData;
+
+    await register(finalData); // Call your backend API
+
+    Alert.alert(
+      'Registration Successful',
+      `Your details:\n\nFull Name: ${registerData.full_name}\nPhone: ${registerData.phone}\nRole: ${registerData.role}\nCity: ${registerData.city}`,
+      [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('login'),
+        },
+      ]
+    );
+  } catch (error: any) {
+    console.error('Registration failed:', error?.response?.data || error.message);
+
+    Alert.alert(
+      'Registration Failed',
+      `Something went wrong.\n\n📦 Sent Data:\nFull Name: ${registerData.full_name}\nPhone: ${registerData.phone}\nRole: ${registerData.role}\nCity: ${registerData.city}\nPassword: ${registerData.password}\nProfile Image: ${registerData.profile_image ?? 'null'}\n\n❌ Error: ${JSON.stringify(error?.response?.data || error.message)}`
+    );
+  }
+};
+
 
   return (
     <SafeAreaView className='my-[5rem] mx-6 flex-1 flex-col gap-y-8'>
       <MaterialIcons name="arrow-circle-left" size={50} color="#253a6c" className='-ms-2'
-        onPress={()=> navigation.navigate('SecondPage')} />
+        onPress={()=> navigation.navigate('OnBoardingPage')} />
         <View className='flex flex-row justify-between items-center  h-32'>
             <Image source={require('../assets/images/voting_3160315.png' )}
                   style={{ height: '100%', width: '35%', resizeMode: 'contain' }} className=''/>
@@ -37,8 +92,9 @@ const App = () => {
         active={active}
         content={content}
         onBack={() => setActive((p) => p - 1)}
-        onFinish={() => alert('Finish')}
-        onNext={() => setActive((p) => p + 1)}
+        onFinish={handleRegister}
+
+        onNext={handleNext}
 
         // ✅ Add your custom styles here
         stepStyle={{
@@ -84,4 +140,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default Register;

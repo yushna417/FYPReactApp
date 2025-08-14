@@ -1,4 +1,4 @@
-import { View, SafeAreaView } from 'react-native';
+import { View, SafeAreaView, Alert } from 'react-native';
 import {
   FormControl,
   FormControlError,
@@ -11,42 +11,64 @@ import {
 } from "@/components/ui/form-control"
 import { Input, InputField, InputSlot} from "@/components/ui/input"
 import { VStack } from "@/components/ui/vstack"
-import React from 'react';
+import React, { forwardRef, useImperativeHandle } from 'react';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
 import { AlertCircleIcon } from '@/components/ui/icon';
-import { Button, ButtonText } from "@/components/ui/button"
+import { IUser } from '@/types/userInterface';
+import Toast from 'react-native-simple-toast'
 
+interface StepProps {
+  data: IUser;
+  setData: React.Dispatch<React.SetStateAction<IUser>>;
+}
 
-const Step3 = () => {
+const Step4 = forwardRef(({ data, setData }: StepProps, ref) => {
   const [isInvalid, setIsInvalid] = React.useState(false)
-  const [inputValue, setInputValue] = React.useState("")
   const [checkPassword, setCheckPassword] = React.useState("")
   const [showPassword, setShowPassword] = React.useState(false);
   const [isPasswordInvalid, setIsPasswordInvalid] = React.useState(false)
-  const navigation = useNavigation<any>();
 
-  const handleSubmit = () => {
-    if (inputValue.length < 12) {
-      setIsInvalid(true)
-    } else {
-      setIsInvalid(false)
-    }
-  }
+   useImperativeHandle(ref, () => ({
+      validate: () => {
+        if (!data.password || data.password.length < 8) {
+          // setIsInvalid(true);
+          Toast.show('Password must be at least 8 characters.', Toast.LONG, {
+          backgroundColor: '#253a6c',
+        });
+          // Alert.alert("");
+          return false;
+        }
 
-  const confirmPassword = () => {
-    if (checkPassword == inputValue) {
-      setIsPasswordInvalid(false)
-    } else {
-      setIsPasswordInvalid (true)
-    }
-  }
+        if (!checkPassword || data.password !== checkPassword) {
+          // setIsPasswordInvalid(true);
+          Toast.show('Passwords do not match. Please try again.', Toast.LONG, {
+          backgroundColor: '#253a6c',
+        });
+          // Alert.alert("");
+          return false;
+        }
 
-  const handlePress = () => {
-    confirmPassword();
-    handleSubmit()
-  }
+        return true;
+      },
+    }));
+
+  // React.useEffect(() => {
+
+  //   if (data.password.length < 8) {
+  //     setIsInvalid(true);
+  //   } else {
+  //     setIsInvalid(false);
+  //   }
+
+
+  //   if (checkPassword && data.password !== checkPassword) {
+  //     setIsPasswordInvalid(true);
+  //   } else {
+  //     setIsPasswordInvalid(false);
+  //   }
+  // }, [data.password, checkPassword]);
+
 
   return (
     
@@ -70,8 +92,8 @@ const Step3 = () => {
               <InputField
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                value={inputValue}
-                onChangeText={(text) => setInputValue(text)}
+                value={data.password}
+                onChangeText={(val) => setData({...data, password:val})}
                 className="text-md ml-2"
               />
               <InputSlot onPress={() => setShowPassword(!showPassword)} className='mr-1' >
@@ -82,7 +104,7 @@ const Step3 = () => {
             {!isInvalid && (
               <FormControlHelper accessible>
               <FormControlHelperText>
-                Minimum 12 characters recommended for strong protection.
+                Minimum 8 characters recommended for strong protection.
               </FormControlHelperText>
             </FormControlHelper>
             )}
@@ -90,7 +112,7 @@ const Step3 = () => {
             <FormControlError>
               <FormControlErrorIcon as={AlertCircleIcon} />
               <FormControlErrorText>
-                Atleast 12 or more characters are required.
+                Atleast 8 or more characters are required.
               </FormControlErrorText>
             </FormControlError>
           </View>          
@@ -140,9 +162,6 @@ const Step3 = () => {
             </FormControlError>
           </View>
             
-          <Button className="w-fit self-end mt-4" size="sm" onPress={handlePress}>
-            <ButtonText>Submit</ButtonText>
-          </Button>
 
           
         </FormControl>
@@ -150,6 +169,6 @@ const Step3 = () => {
       </VStack>
     </SafeAreaView>
   );
-};
+});
 
-export default Step3;
+export default Step4;

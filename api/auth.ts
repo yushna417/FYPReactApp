@@ -1,0 +1,44 @@
+import apiClient from "./axios"
+import { ILoginPayload } from "@/types/loginPayloadInterface"
+import { IUser } from "@/types/userInterface"
+import {BASE_URL} from './axios'
+import { Role } from "@/types/userInterface"
+
+export const Login_URL = `${BASE_URL}token/`
+export const Refresh_URL = `${BASE_URL}token/refresh/`
+export const Logout_URL = `${BASE_URL}logout`
+export const Register_URL = `${BASE_URL}user/register`
+export const LogggedIn_URL = `${BASE_URL}is_loggedIn/`
+
+export type TokenResponse = {
+  access: string;
+  refresh: string;
+}
+
+
+export const login = async (data: ILoginPayload):  Promise<TokenResponse & { role: Role }> => {
+  const response = await apiClient.post(Login_URL, data);
+  return response.data;
+};
+
+export const register = async (data: IUser): Promise<void> => {
+  await apiClient.post(Register_URL, data);
+};
+
+export const logout = async (): Promise<void> => {
+  await apiClient.post(Logout_URL);
+};
+
+export const checkAuth = async (): Promise<boolean> => {
+  try {
+    await apiClient.get(LogggedIn_URL);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+export const refreshToken = async (refreshToken: string): Promise<TokenResponse> => {
+  const response = await apiClient.post(Refresh_URL, { refresh: refreshToken });
+  return response.data;
+};

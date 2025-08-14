@@ -7,7 +7,7 @@ const index = () => {
 
   useEffect(() => {
     const timer = setTimeout(()=>{
-      router.replace('/SecondPage');
+      router.replace('/(tabs)');
     }, 2000);
 
     return () => clearTimeout(timer)
