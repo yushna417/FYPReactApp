@@ -16,8 +16,9 @@ export const VegetableService = {
   },
 
   getLatestPrices: async (): Promise<IDailyPrice[]> => {
+    const today = new Date().toISOString().split("T")[0];
     const response = await apiClient.get(
-      `daily-prices/with_daily_changes/?ordering=-date&limit=10`
+      `daily-prices/with_daily_change/?date=${today}`
     );
     return response.data;
   }

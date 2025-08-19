@@ -2,7 +2,7 @@ import { IVeg } from "./vegetableInterface";
 
 export interface IDailyPrice {
   id: number;
-  vegetable: number | IVeg; // Use number if you only receive the ID, or IVeg if full nested object
+  vegetable:  IVeg; // Use number if you only receive the ID, or IVeg if full nested object
   date: string;
   min_price: number;
   max_price: number;

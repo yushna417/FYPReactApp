@@ -68,8 +68,6 @@ const login = () => {
   return (
     
     <SafeAreaView className='flex-col py-36 px-8 gap-y-8 font-poppins'>
-        <MaterialIcons name="arrow-circle-left" size={50} color="#253a6c" className='-ms-2'
-        onPress={()=> navigation.navigate('OnBoardingPage')} />
         <Text className='text-4xl font-poppins font-extrabold text-[#253a6c]'>Login</Text>
       <VStack className="w-full rounded-md ">
         <FormControl

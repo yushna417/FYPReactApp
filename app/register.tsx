@@ -42,17 +42,15 @@ const Register = () => {
     }
   };
 
-// In your register component
 const handleRegister = async () => {
   const isValid = await stepRefs[3].current?.validate();
   if (!isValid) return;
 
   try {
-    // Remove profile_image if null or empty string
     const { profile_image, ...safeData } = registerData;
     const finalData = profile_image ? { ...registerData } : safeData;
 
-    await register(finalData); // Call your backend API
+    await register(finalData); 
 
     Alert.alert(
       'Registration Successful',
@@ -76,9 +74,8 @@ const handleRegister = async () => {
 
 
   return (
-    <SafeAreaView className='my-[5rem] mx-6 flex-1 flex-col gap-y-8'>
-      <MaterialIcons name="arrow-circle-left" size={50} color="#253a6c" className='-ms-2'
-        onPress={()=> navigation.navigate('OnBoardingPage')} />
+    <SafeAreaView className='my-36 mx-6 flex-1 flex-col gap-y-8'>
+      
         <View className='flex flex-row justify-between items-center  h-32'>
             <Image source={require('../assets/images/voting_3160315.png' )}
                   style={{ height: '100%', width: '35%', resizeMode: 'contain' }} className=''/>

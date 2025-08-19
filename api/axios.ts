@@ -25,17 +25,5 @@ apiClient.interceptors.request.use(async (config) => {
   return config;
 });
 
-export const VegetableService = {
-  getAllVegetables: async(): Promise<IVeg[]> => {
-    const response = await apiClient.get('vegetables/');
-    return response.data;
-  },
-
-  getDailyPrices: async (vegetableId: number): Promise<IDailyPrice[]> => {
-    const response = await apiClient.get(`daily-prices/?vegetable=${vegetableId}`);
-    return response.data;
-  },
-
-}
 
 export default apiClient;

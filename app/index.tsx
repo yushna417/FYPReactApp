@@ -7,7 +7,7 @@ const index = () => {
 
   useEffect(() => {
     const timer = setTimeout(()=>{
-      router.replace('/(tabs)');
+      router.replace('/OnBoardingPage');
     }, 2000);
 
     return () => clearTimeout(timer)
