@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { VegetableService } from '@/api/axios';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
+import { VegetableService } from '@/api/vegetableService';
+import { Box } from './ui/box';
 
 interface Props {
   vegetableId: number;
@@ -12,12 +13,19 @@ interface Props {
 const VegetablePriceTracker = ({ vegetableId }: Props) => {
   const [prices, setPrices] = useState<IDailyPrice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [latestPrice, setLatestPrice] = useState<IDailyPrice>()
+
 
   useEffect(() => {
     const loadData = async () => {
       try {
         const data = await VegetableService.getDailyPrices(vegetableId);
-        setPrices(data);
+        const sortedData = data.sort((a, b) => 
+          new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setLatestPrice(sortedData[0] || null)
+        const latest7Days = sortedData.slice(0, 7);
+        setPrices(latest7Days.reverse());
       } catch (error) {
         console.error('Failed to fetch prices:', error);
       } finally {
@@ -28,93 +36,74 @@ const VegetablePriceTracker = ({ vegetableId }: Props) => {
     loadData();
   }, [vegetableId]);
 
+ 
+
   if (loading) return <ActivityIndicator size="large" />;
 
   if (!prices.length) return <Text>No price data available</Text>;
 
   return (
-    <View style={styles.container}>
-      {/* Price Trend Chart */}
+    <View className='flex-col gap-2'>
+      <Box className="bg-slate-200 border border-slate-300 px-5 py-3 rounded-xl mb-3 shadow-sm flex-row justify-between items-center">
+      <Text className="font-poppins text-lg font-semibold text-slate-600">
+        Percentage Change
+      </Text>
+     <Text className={`font-poppins text-base font-bold ${latestPrice?.trend === 'up'? 'text-green-500': 'text-red-500'}`}>{latestPrice?.daily_change} %</Text>
+    </Box>
+
+    <Box className="bg-slate-200 border border-slate-300 px-5 py-3 rounded-xl shadow-sm flex-row justify-between items-center">
+      <Text className="font-poppins text-lg font-semibold text-slate-600">
+        Price Range
+      </Text>
+      <Text className="font-poppins text-base font-semibold text-slate-600">
+        Rs {latestPrice?.min_price} - Rs {latestPrice?.max_price}
+      </Text>
+    </Box>
+  
+      <Text className='font-poppins text-lg font-bold mt-6 text-MainTheme'>Market Trend</Text>
       <LineChart
         data={{
-          labels: prices.map(p => new Date(p.date).toLocaleDateString()),
+          labels: prices.map(p => {
+            const date = new Date(p.date);
+            return date.toLocaleDateString('en-US', { day: 'numeric', month: 'numeric' });
+          }),
           datasets: [{
             data: prices.map(p => p.avg_price),
           }]
         }}
-        width={Dimensions.get('window').width - 40}
-        height={220}
-        yAxisLabel="₹"
+        width={Dimensions.get('window').width - 50}
+        height={250}
         chartConfig={{
-          backgroundColor: '#ffffff',
-          backgroundGradientFrom: '#ffffff',
-          backgroundGradientTo: '#ffffff',
+          backgroundColor: '#697fbd',
+          backgroundGradientFrom: '#253a6c', 
+          backgroundGradientTo: '#7dbef4',   
           decimalPlaces: 2,
-          color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`, 
+          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+         
           propsForDots: {
-            r: 4,
+            r: 5,
             strokeWidth: 2,
-            stroke: '#3b82f6'
+            stroke: '#ffffff' // White dots
+          },
+          propsForBackgroundLines: {
+            strokeDasharray: "5", // Solid lines
+            stroke: 'rgba(255, 255, 255, 0.2)' // Light white grid lines
           }
         }}
         bezier
+        style={{
+          marginVertical: 8,
+          borderRadius: 6
+        }}
       />
-
-      {/* Price List */}
-      <View style={styles.priceList}>
-        {prices.map((price) => (
-          <View key={price.id} style={styles.priceItem}>
-            <Text style={styles.dateText}>
-              {new Date(price.date).toLocaleDateString()}
-            </Text>
-            <Text style={styles.priceText}>₹{price.avg_price.toFixed(2)}</Text>
-            <Text style={[
-              styles.changeText,
-              price.trend === 'up' && styles.trendUp,
-              price.trend === 'down' && styles.trendDown
-            ]}>
-              {price.daily_change ? `${price.daily_change.toFixed(1)}%` : '-'}
-            </Text>
-          </View>
-        ))}
-      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     backgroundColor: '#fff'
-  },
-  priceList: {
-    marginTop: 20
-  },
-  priceItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6'
-  },
-  dateText: {
-    flex: 2,
-    color: '#6b7280'
-  },
-  priceText: {
-    flex: 1,
-    textAlign: 'right',
-    fontWeight: '600'
-  },
-  changeText: {
-    flex: 1,
-    textAlign: 'right'
-  },
-  trendUp: {
-    color: '#ef4444' // Red for increase
-  },
-  trendDown: {
-    color: '#10b981' // Green for decrease
   }
 });
 

@@ -16,17 +16,17 @@ export default function TabLayout() {
   const colorScheme = useColorScheme();
   const { isAuthenticated, isLoading } = useAuth();
 
-  // if (isLoading) {
-  //   return (
-  //     <View className="flex-1 justify-center items-center">
-  //       <ActivityIndicator size="large" />
-  //     </View>
-  //   );
-  // }
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
-  // if (!isAuthenticated) {
-  //   return <Redirect href="/login" />;
-  // }
+  if (!isAuthenticated) {
+    return <Redirect href="/login" />;
+  }
 
   return (
         <Tabs
@@ -83,7 +83,7 @@ export default function TabLayout() {
           />
 
           <Tabs.Screen
-            name="vegetable"
+            name="Analytics"
             options={{
               tabBarIcon: ({ focused }) => (
                 <View

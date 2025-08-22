@@ -6,6 +6,9 @@ import {
 } from "@/components/ui/form-control";
 import { HStack } from '@/components/ui/hstack';
 import { Input, InputField, InputSlot } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
+
+
 
 import {
   Radio,
@@ -84,13 +87,13 @@ const login = () => {
               <RadioGroup
                 value={loginData.role}
                 onChange={(val) => setLoginData({ ...loginData, role:val as Role })}
-                className='border border-[#d5d4d4] h-14 rounded-xl flex items-center flex-row w-full mt-1'
+                className='border border-[#d5d4d4] h-14 rounded-xl flex items-center flex-row w-full mt-3'
               >
                 <HStack >
                   {/* Vendor Radio */}
                   <Radio
                     value="vendor"
-                    className={`h-14 w-[50%] rounded-xl flex justify-center items-center ${
+                    className={`h-16 w-[50%] rounded-xl flex justify-center items-center ${
                       loginData.role === "vendor" ? "bg-[#253a6c]" : ""
                     }`}
                   >
@@ -106,7 +109,7 @@ const login = () => {
                   {/* Customer Radio */}
                   <Radio
                     value="customer"
-                    className={`h-14 w-1/2 rounded-xl flex justify-center items-center ${
+                    className={`h-16 w-1/2 rounded-xl flex justify-center items-center ${
                       loginData.role === "customer" ? "bg-[#253a6c]" : ""
                     }`}
                   >
@@ -122,10 +125,10 @@ const login = () => {
               </RadioGroup>
 
 
-          <FormControlLabel className='mt-6 font-poppins'>
+          <FormControlLabel className='mt-7 font-poppins'>
             <FormControlLabelText>Phone Number</FormControlLabelText>
           </FormControlLabel>
-          <Input className="rounded-xl px-4 mt-1 h-14" >
+          <Input className="rounded-xl px-4 mt-3 h-14" >
             <FontAwesome5 name="user-alt" size={18} color="#2b2b2c" />  
             <InputField placeholder="98********"            
               className="text-md ml-2"
@@ -136,10 +139,10 @@ const login = () => {
           </Input>
           
           {/* Password */}
-          <FormControlLabel className='mt-6 font-poppins'>
+          <FormControlLabel className='mt-7 font-poppins'>
             <FormControlLabelText>Password</FormControlLabelText>
           </FormControlLabel>
-          <Input className=" rounded-xl px-4 mt-1 h-14">
+          <Input className=" rounded-xl px-4 mt-3 h-14">
             <FontAwesome5 name="lock" size={18} color="black" />
             <InputField
               type={showPassword ? "text" : "password"}
@@ -164,12 +167,13 @@ const login = () => {
      
     
 
-        <Button className="w-full flex-col self-end mt-10 rounded-lg h-16 bg-[#243c6b]" size="md" onPress={handleSubmit}>
-          <ButtonText className='text-lg'
+        <Button className="w-full flex justify-around self-end mt-10 rounded-lg h-16 bg-[#243c6b]" size="md" onPress={handleSubmit}>
+          <ButtonText className='text-lg '
           onPress={handleSubmit}
           disabled={isLoading}>
            {isLoading ? 'Logging in...' : 'Login'}
           </ButtonText>
+          
           
         </Button>
 

@@ -2,15 +2,24 @@
 import React, { useState, useEffect } from 'react';
 import {Text,  View, FlatList, TouchableOpacity } from 'react-native';
 import { Spinner } from '@/components/ui/spinner';
-import { Button, ButtonText } from '@/components/ui/button';
-import { Input, InputField } from '@/components/ui/input';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { VegetableService } from '@/api/vegetableService';
 import { IVeg } from '@/types/vegetableInterface';
 import VegetablePriceTracker from '@/components/VegetablePriceTracker';
+import { Ionicons } from '@expo/vector-icons';
+
+type RootStackParamList = {
+  Vegetable: {vegetable:string}
+}
+
+type VegetableScreenRouteProp = RouteProp<RootStackParamList, 'Vegetable'>;
 
 const VegetableScreen = () => {
+  const route = useRoute<VegetableScreenRouteProp>();
+  const passedVegetableName = route.params?.vegetable;
   const [vegetables, setVegetables] = useState<IVeg[]>([]);
   const [query, setQuery] = useState('');
   const [filteredVegetables, setFilteredVegetables] = useState<IVeg[]>([]);
@@ -24,6 +33,16 @@ const VegetableScreen = () => {
       try {
         const data = await VegetableService.getAllVegetables();
         setVegetables(data);
+
+         if (passedVegetableName) {
+          const foundVeg = data.find(v => 
+            v.name.toLowerCase() === passedVegetableName.toLowerCase()
+          );
+          if (foundVeg) {
+            setSelectedVegetable(foundVeg);
+            setQuery(foundVeg.name);
+          }
+        }
       } catch (error) {
         console.error('Failed to load vegetables:', error);
       } finally {
@@ -31,10 +50,10 @@ const VegetableScreen = () => {
       }
     };
     loadVegetables();
-  }, []);
+  }, [passedVegetableName]);
 
   useEffect(() => {
-    if (query === '') {
+    if (query === '' || selectedVegetable) {
       setFilteredVegetables([]);
       setShowSuggestions(false);
       return;
@@ -46,7 +65,7 @@ const VegetableScreen = () => {
 
     setFilteredVegetables(filtered);
     setShowSuggestions(true);
-  }, [query, vegetables]);
+  }, [query, vegetables, selectedVegetable]);
 
   const handleSelect = (veg: IVeg) => {
     setSelectedVegetable(veg);
@@ -62,33 +81,31 @@ const VegetableScreen = () => {
   };
 
   return (
-    <View className="flex-1 px-7 py-20  bg-gray-50">
-      <Text className="text-xl font-bold mb-6 text-gray-800">Vegetable Price Tracker</Text>
+    <View className="flex-1 px-7  relative bg-slate-100 gap-5">
+      <View className='bg-MainTheme -mx-7 pt-24 pb-10 px-7'>
+        <Text className="text-3xl font-black mb-6 text-white font-poppins text-center">Vegetable Price Tracker</Text>
       
-      <VStack space="md" className="mb-4">
-        <Text className="text-sm font-semibold text-gray-700">Search for a Vegetable</Text>
-        
-        <Box className="relative">
-          <Input variant="outline" size="md" className="border-gray-300 rounded-lg">
-            <InputField
+      <VStack space="md" className="mb-4 border-slate-300 border px-4 py-8 rounded-lg bg-white" 
+      style={{boxShadow: " 7px 7px 7px #0b1829",}}>        
+          <View >
+            <Text className='font-poppins font-bold text-xl text-MainTheme'>Search for a Vegetable</Text>
+          </View>
+          <Input className="rounded-xl mt-1 h-14 px-2" >
+            <InputField  size='lg'           
+              className="text-md font-poppins "
               value={query}
               onChangeText={setQuery}
               placeholder="Type vegetable name..."
-              onFocus={() => query.length > 0 && setShowSuggestions(true)}
             />
-          </Input>
           
           {query.length > 0 && (
-            <Button 
-              variant="link" 
-              size="sm" 
-              className="absolute right-2 top-2"
-              onPress={clearSelection}
-            >
-              <ButtonText>Clear</ButtonText>
-            </Button>
+            <InputSlot  className='mr-1' onPress={clearSelection} >
+              <Ionicons name='close-outline' size={20} color="gray" />
+            </InputSlot>
           )}
-        </Box>
+            
+          </Input>
+
 
         {showSuggestions && filteredVegetables.length > 0 && (
           <Box className="border border-gray-300 rounded-lg bg-white shadow-md max-h-48">
@@ -101,7 +118,7 @@ const VegetableScreen = () => {
                   className="px-4 py-3 border-b border-gray-100 active:bg-gray-100"
                 >
                   <Text className="text-gray-800">
-                    {item.name} {item.unit && `(${item.unit})`}
+                    {item.name} / {item.unit && `(${item.unit})`}
                   </Text>
                 </TouchableOpacity>
               )}
@@ -116,16 +133,21 @@ const VegetableScreen = () => {
           </Box>
         )}
       </VStack>
+      </View>
+      
 
       {isLoading && (
-        <Box className="items-center justify-center py-8">
+        <Box className="items-center justify-center py-8 absolute">
           <Spinner size="large" />
           <Text className="mt-2 text-gray-600">Loading vegetables...</Text>
         </Box>
       )}
 
       {selectedVegetable && (
-        <VegetablePriceTracker vegetableId={selectedVegetable.id} />
+        <View className='flex-col gap-2'>
+          
+          <VegetablePriceTracker vegetableId={selectedVegetable.id} />
+        </View>
       )}
 
       {!selectedVegetable && !isLoading && (

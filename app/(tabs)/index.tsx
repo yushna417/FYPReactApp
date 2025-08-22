@@ -22,7 +22,6 @@ const HomePage = () => {
     surging: IDailyPrice[];
     dropping: IDailyPrice[];
   }>({ surging: [], dropping: [] });
-  const [vegetables, setVegetables] = useState<IVeg[]>([]);
   const [loading, setLoading] = useState(true);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -230,16 +229,13 @@ const HomePage = () => {
               </TouchableOpacity>
             </HStack>
             
-            <HStack space="md" className="w-full">
-              <View className="flex-1 w-[190px]">
-                <View className="bg-white p-2.5 rounded-t-xl border-b-2 border-green-100 shadow-sm" style={{
-                  backgroundColor: '#4CAF70',
-                  shadowColor: '#e1e1e1',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 6,
-                  elevation: 3,
-                }}>
+            <HStack space='xl' className="w-full">
+              <View className="flex-1 rounded-xl"
+              style={{
+                     boxShadow: " 7px 7px 7px #d9d9e1",
+
+              }}>
+                <View className="bg-[#4CAF70] p-2.5 rounded-t-xl border-b-2 border-green-100 shadow-sm">
                   <HStack className="items-center justify-between">
                     <Text className="font-bold text-lg  text-white">Price Surge</Text>
                     <View className="bg-green-100 p-1.5 rounded-full">
@@ -255,28 +251,26 @@ const HomePage = () => {
                   elevation: 2,
                 }}>
                   {trendingData.surging.map((veg) => (
-                    <View key={veg.id} className=" last:mb-0 pb-2 border-b-2 border-gray-200">
+                    <TouchableOpacity onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
+                     key={veg.id} className=" last:mb-0 pb-2 border-b-2 border-gray-200">
                       <HStack className="items-center justify-between ">
-                        <Text className="font-medium text-gray-800 text-base w-36" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
-                        <HStack className="items-center bg-[#4CAF70] px-1 py-1 rounded-xl justify-center w-14">
-                          <Text className="text-white font-bold text-xs">+{veg.daily_change !== null ? veg.daily_change.toFixed(1):"0.0"} %</Text>
+                        <Text className="font-medium text-gray-800 text-[0.9rem] w-32" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
+                        <HStack className="items-center bg-[#4CAF70] py-1 rounded-xl justify-center w-14">
+                          <Text className="text-white font-bold text-xs">+{veg.daily_change !== null ? veg.daily_change.toFixed(1):"0.0"}%</Text>
                         </HStack>
                       </HStack>
                       <Text className="text-gray-500 text-xs">Rs {veg.avg_price} /{veg.vegetable.unit}</Text>
-                    </View>
+                    </TouchableOpacity>
                   ))}
                 </VStack>
               </View>
 
-              <View className="flex-1 w-[190px]">
-                <View className="bg-white p-2.5 rounded-t-xl border-b-2 border-red-100 shadow-sm" style={{
-                  backgroundColor: '#cf2233',
-                  shadowColor: '#EF4444',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 6,
-                  elevation: 3,
-                }}>
+              <View className="flex-1 rounded-xl"
+              style={{
+                     boxShadow: " 7px 7px 7px #d9d9e1",
+
+              }}>
+                <View className=" p-2.5 rounded-t-xl border-b-2 border-red-100 shadow-sm bg-[#cf2233]" >
                   <HStack className="items-center justify-between">
                     <Text className="font-bold text-lg text-white">Price Drop</Text>
                     <View className="bg-red-100 p-1.5 rounded-full">
@@ -284,23 +278,18 @@ const HomePage = () => {
                     </View>
                   </HStack>
                 </View>
-                <VStack space="sm" className="bg-gray-50 pt-2 px-3 rounded-b-xl" style={{
-                  shadowColor: '#EF4444',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.05,
-                  shadowRadius: 6,
-                  elevation: 2,
-                }}>
+                <VStack space="sm" className="bg-gray-50 pt-2 px-3 rounded-b-xl" >
                   {trendingData.dropping.map((veg) => (
-                    <View key={veg.id} className="pb-2 border-b-2 border-gray-200 ">
+                    <TouchableOpacity onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
+                     key={veg.id} className="pb-2 border-b-2 border-gray-200 ">
                       <HStack className="items-center justify-between">
-                        <Text className="font-medium text-gray-800 text-base w-36" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
-                        <HStack className="items-center justify-center bg-[#cf2233] px-1 py-1 rounded-2xl w-14">
-                        <Text className="text-white font-bold text-xs">{veg.daily_change !== null ? veg.daily_change.toFixed(1):"0.0"} %</Text>
+                        <Text className="font-medium text-gray-800 text-[0.9rem] w-32" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
+                        <HStack className="items-center justify-center bg-[#cf2233] py-1 rounded-2xl w-14">
+                        <Text className="text-white font-bold text-xs">{veg.daily_change !== null ? veg.daily_change.toFixed(1):"0.0"}%</Text>
                         </HStack>
                       </HStack>
                       <Text className="text-gray-500 text-xs">Rs {veg.avg_price} /{veg.vegetable.unit}</Text>
-                    </View>
+                    </TouchableOpacity>
                   ))}
                 </VStack>
               </View>
