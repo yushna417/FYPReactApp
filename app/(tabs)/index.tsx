@@ -1,18 +1,15 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Easing, ActivityIndicator } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Easing, ActivityIndicator, Alert } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
 import { HStack } from '@/components/ui/hstack';
-import { FontAwesome5, MaterialCommunityIcons, MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { FontAwesome5, MaterialCommunityIcons, MaterialIcons, Octicons} from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { Actionsheet, ActionsheetContent, ActionsheetItem, ActionsheetItemText, ActionsheetDragIndicator, ActionsheetDragIndicatorWrapper, ActionsheetBackdrop } from "@/components/ui/actionsheet";
-import { Button, ButtonText } from "@/components/ui/button";
 import { useState, useRef, useEffect } from 'react';
-import { IVeg } from '@/types/vegetableInterface';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
 import { VegetableService } from '@/api/vegetableService';
-import { navigate } from 'expo-router/build/global-state/routing';
-
+import { UserData } from '@/types/userInterface';
+import { checkAuth } from '@/api/auth';
 
 
 const HomePage = () => {
@@ -23,6 +20,8 @@ const HomePage = () => {
     dropping: IDailyPrice[];
   }>({ surging: [], dropping: [] });
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserData | null> (null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -75,7 +74,7 @@ const HomePage = () => {
 
   
 
-  const user = {
+  const users = {
     name: 'Random Person',
     profilePic: 'https://randomuser.me/api/portraits/men/1.jpg',
     ordersCompleted: 24,
@@ -105,48 +104,94 @@ const HomePage = () => {
   }, []);
 
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const authResult = await checkAuth();
+        if (authResult.isAuthenticated && authResult.user){
+          setUser(authResult.user)
+        } else{
+          Alert.alert('Authentication Error', "You are nto authenicated to view this page")
+        }
+      } catch(error:any){
+        console.log('Error fetching user data:', error)
+        Alert.alert('Authentication Error', "An error occurred during authentication.");
+      } finally {
+        setLoading(false)
+        setIsCheckingAuth(false)
+      }
+      
+    }
+  
+    fetchUserData();
+  }, [])
+  
+  if (isCheckingAuth) {
+    return <ActivityIndicator />
+  }
+
+  if (!user){
+    return null
+  }
+   
+
   if (loading) {
     return <ActivityIndicator size="large" />;
   }
 
   return (
     <GluestackUIProvider>
-      <Box style={{ flex: 1, backgroundColor: '#DDE3E6', paddingBottom:40 }}>
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 80 }} className='bg-[#eff8f7] '>
-          {/* Enhanced Profile Section */}
-          <VStack space="md" className='px-5 pt-16 bg-MainTheme rounded-br-[2rem]'>
+      <Box style={{ flex: 1, backgroundColor: '#DDE3E6'}} >
+        <ScrollView showsVerticalScrollIndicator={false} className='bg-white  '>
+          <VStack space="md" className='px-5 pt-14  rounded-b-2xl bg-MainTheme'>
              <View className="absolute -right-1 z-20 -top-10 w-32 h-32 bg-white opacity-10 rounded-full"></View>
               <View className="absolute -right-5 -bottom-5 w-20 h-20 bg-white opacity-10 rounded-full"></View>
-            <HStack space="sm" className='flex items-center'>
-              <HStack space="xl" className='flex py-2 w-[20.5rem] h-32 relative overflow-hidden'
+            <HStack space="sm" className='flex items-center bg rounded-xl justify-between'>
+              <HStack space="xl" className='flex py-3 w-[21rem] rounded-xl  h-28 relative overflow-hidden bg-MainTheme'
               style={{
                 shadowColor: themeColor,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.1,
                 shadowRadius: 6,
               }}>
-               
                 
-                <Image
-                  source={{ uri: user.profilePic }}
-                  style={{
-                    width: 70,
-                    height: 70,
-                    borderRadius: 16,
-                    borderWidth: 3,
-                    borderColor: 'white',
-                  }}
-                />
+                <TouchableOpacity>
+                  {user.profile_image ? (
+                    <Image
+                      source={{ uri: user.profile_image }}
+                      style={{
+                        width: 70,
+                        height: 70,
+                        borderRadius: 16,
+                        borderWidth: 3,
+                        borderColor: 'white',
+                      }}
+                    />
+                  ) : (
+                    <View style={{
+                      width: 70,
+                      height: 70,
+                      borderRadius: 16,
+                      borderWidth: 3,
+                      borderColor: 'white',
+                      backgroundColor: '#e0e0e0', // Light gray background
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                      <Octicons name="device-camera" size={32} color="gray" />
+                    </View>
+                  )}
+                </TouchableOpacity>
                 <VStack >
                   <Text className="text-white text-lg font-poppins">Welcome back!</Text>
-                  <Text className="text-white text-2xl font-bold font-potta">{user.name}</Text>
+                  <Text className="text-white text-2xl font-bold font-potta">{user.full_name}</Text>
                   <HStack className="items-center mt-1">
-                    <Text className="text-white text-xs">Member since {user.memberSince}</Text>
+                    <Text className="text-white text-xs">Member since {user.date_joined}</Text>
                   </HStack>
                 </VStack>
               </HStack>
               
-              <View className="bg-[#eaeef1] p-3 h-32 w-24 rounded-t-3xl items-center justify-center shadow-lg" style={{
+              <View className="bg-[#A0AEC0] p-3 h-28 w-24 rounded-t-3xl items-center justify-center shadow-lg" style={{
                 shadowColor: themeColor,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.1,
@@ -156,7 +201,7 @@ const HomePage = () => {
                   <MaterialCommunityIcons name="truck-delivery" size={20} color="white" />
                 </View>
                 <Text className="text-MainTheme text-sm font-poppins font-extrabold">Orders</Text>
-                <Text className="text-MainTheme font-bold text-xl">{user.ordersCompleted}</Text>
+                <Text className="text-MainTheme font-bold text-xl">{users.ordersCompleted}</Text>
               </View>
             </HStack>
           </VStack>
@@ -168,7 +213,7 @@ const HomePage = () => {
               shadowOpacity: 0.2,
               shadowRadius: 10,
             }}>
-            <View className="relative h-72 rounded-r-3xl  overflow-hidden flex flex-row " >
+            <View className="relative h-72 rounded-2xl  overflow-hidden flex flex-row " >
               <Image 
                 source={require('../../assets/images/map.jpeg')}
                 className="w-[61%] h-full"
@@ -176,9 +221,6 @@ const HomePage = () => {
               />
               
               <View className="w-[40%] h-full bg-[#93c6e1] flex flex-row justify-center pr-3 relative">
-                <View className="absolute -right-10 -top-10 w-32 h-32 bg-white opacity-10 rounded-full"></View>
-                <View className="absolute right-5 -top-25 w-36 h-36 bg-white opacity-10 rounded-full"></View>
-                <View className="absolute -right-5 -bottom-5 w-20 h-20 bg-white opacity-10 rounded-full"></View>
                 <Text className="text-MainTheme text-xl leading-6 font-extrabold drop-shadow-lg text-right pr-5 pt-14 -ml-10 font-poppins relative z-10">
                   Fresh vegetables delivered to your doorstep within hours
                 </Text>
@@ -223,7 +265,7 @@ const HomePage = () => {
               <Text className="text-xl font-bold" style={{ color: themeColor }}>
                 Market Trends
               </Text>
-              <TouchableOpacity className="flex-row items-center" onPress={()=> navigation.navigate("vegetable")}>
+              <TouchableOpacity className="flex-row items-center" onPress={()=> navigation.navigate("Analytics")}>
                 <Text className="text-MainTheme text-sm mr-1">View All</Text>
                 <MaterialIcons name="arrow-forward-ios" size={14} color={themeColor} />
               </TouchableOpacity>

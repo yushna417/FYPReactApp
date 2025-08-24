@@ -35,13 +35,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const storedRefreshToken = await SecureStore.getItemAsync('refreshToken');
         
         if (storedToken && storedRefreshToken) {
-          // Verify if token is still valid
           const isValid = await checkAuth();
           if (isValid) {
             setToken(storedToken);
             setIsAuthenticated(true);
           } else {
-            // Attempt to refresh token
             try {
               const { access } = await refreshToken(storedRefreshToken);
               await SecureStore.setItemAsync('authToken', access);
@@ -105,7 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     router.replace('/login');
   } catch (error) {
     console.error('Registration error:', error);
-    throw error; // Let the UI component handle the display
+    throw error; 
   }
 };
 

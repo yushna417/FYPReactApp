@@ -1,5 +1,4 @@
-import { IDailyPrice } from '@/types/dailyPriceInterface';
-import { IVeg } from '@/types/vegetableInterface';
+
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 

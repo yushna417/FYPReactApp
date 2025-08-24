@@ -88,7 +88,7 @@ const VegetableScreen = () => {
       <VStack space="md" className="mb-4 border-slate-300 border px-4 py-8 rounded-lg bg-white" 
       style={{boxShadow: " 7px 7px 7px #0b1829",}}>        
           <View >
-            <Text className='font-poppins font-bold text-xl text-MainTheme'>Search for a Vegetable</Text>
+            <Text className='font-poppins font-bold text-xl text-MainTheme text-center'>Enter Vegetable Name</Text>
           </View>
           <Input className="rounded-xl mt-1 h-14 px-2" >
             <InputField  size='lg'           

@@ -1,6 +1,6 @@
 import apiClient from "./axios"
 import { ILoginPayload } from "@/types/loginPayloadInterface"
-import { IUser } from "@/types/userInterface"
+import { IUser, UserData } from "@/types/userInterface"
 import {BASE_URL} from './axios'
 import { Role } from "@/types/userInterface"
 
@@ -29,12 +29,17 @@ export const logout = async (): Promise<void> => {
   await apiClient.post(Logout_URL);
 };
 
-export const checkAuth = async (): Promise<boolean> => {
+export const checkAuth = async (): Promise<{isAuthenticated: boolean, user?: UserData}> => {
   try {
-    await apiClient.get(LogggedIn_URL);
-    return true;
+    const response = await apiClient.get(LogggedIn_URL);
+    return {
+      isAuthenticated: true,
+      user: response.data as UserData
+    };
   } catch (error) {
-    return false;
+    return {
+      isAuthenticated: false
+    };
   }
 };
 
