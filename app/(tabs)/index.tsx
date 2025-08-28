@@ -1,4 +1,4 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Easing, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Animated, Easing, ActivityIndicator, Alert, Pressable } from 'react-native';
 import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
@@ -10,6 +10,11 @@ import { IDailyPrice } from '@/types/dailyPriceInterface';
 import { VegetableService } from '@/api/vegetableService';
 import { UserData } from '@/types/userInterface';
 import { checkAuth } from '@/api/auth';
+import { Modal } from 'react-native';
+import React from "react"
+import { Divider } from '@/components/ui/divider';
+import { pickFromGallery, takePhoto } from '@/utils/useImagePick';
+import ImageSourceModal from '@/components/imageSourceModal';
 
 
 const HomePage = () => {
@@ -22,6 +27,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<UserData | null> (null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [showModal, setShowModal] = useState(false)
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -67,21 +73,6 @@ const HomePage = () => {
    fetchData();  
   }, []);
 
-   const formatChange = (change: number | null) => {
-    if (change === null) return '0%';
-    return `${change > 0 ? '+' : ''}${Math.abs(change).toFixed(0)}%`;
-  };
-
-  
-
-  const users = {
-    name: 'Random Person',
-    profilePic: 'https://randomuser.me/api/portraits/men/1.jpg',
-    ordersCompleted: 24,
-    memberSince: '2022',
-  };
-
-
   useEffect(() => {
     const pulseAnimation = Animated.loop(
       Animated.sequence([
@@ -102,7 +93,6 @@ const HomePage = () => {
     pulseAnimation.start();
     return () => pulseAnimation.stop();
   }, []);
-
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -142,12 +132,12 @@ const HomePage = () => {
   return (
     <GluestackUIProvider>
       <Box style={{ flex: 1, backgroundColor: '#DDE3E6'}} >
-        <ScrollView showsVerticalScrollIndicator={false} className='bg-white  '>
+        <ScrollView showsVerticalScrollIndicator={false} className='bg-slate-100 '>
           <VStack space="md" className='px-5 pt-14  rounded-b-2xl bg-MainTheme'>
              <View className="absolute -right-1 z-20 -top-10 w-32 h-32 bg-white opacity-10 rounded-full"></View>
               <View className="absolute -right-5 -bottom-5 w-20 h-20 bg-white opacity-10 rounded-full"></View>
-            <HStack space="sm" className='flex items-center bg rounded-xl justify-between'>
-              <HStack space="xl" className='flex py-3 w-[21rem] rounded-xl  h-28 relative overflow-hidden bg-MainTheme'
+            <HStack space="sm" className='flex items-center rounded-xl justify-between'>
+              <HStack space="xl" className='flex py-3 w-[21rem] rounded-xl ps-1 h-28 relative overflow-hidden bg-MainTheme'
               style={{
                 shadowColor: themeColor,
                 shadowOffset: { width: 0, height: 4 },
@@ -155,33 +145,39 @@ const HomePage = () => {
                 shadowRadius: 6,
               }}>
                 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => setShowModal(true)}>
                   {user.profile_image ? (
                     <Image
                       source={{ uri: user.profile_image }}
                       style={{
-                        width: 70,
-                        height: 70,
+                        width: 75,
+                        height: 75,
                         borderRadius: 16,
                         borderWidth: 3,
                         borderColor: 'white',
                       }}
                     />
                   ) : (
-                    <View style={{
-                      width: 70,
-                      height: 70,
+                    <View 
+                    style={{
+                      width: 75,
+                      height: 75,
                       borderRadius: 16,
                       borderWidth: 3,
                       borderColor: 'white',
-                      backgroundColor: '#e0e0e0', // Light gray background
+                      backgroundColor: '#A0AEC0', // Light gray background
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}>
-                      <Octicons name="device-camera" size={32} color="gray" />
+                      <Octicons name="device-camera" size={32} color="white" />
                     </View>
                   )}
                 </TouchableOpacity>
+               
+               <ImageSourceModal
+               visible = {showModal}
+               onClose={()=> setShowModal(false)}/>
+
                 <VStack >
                   <Text className="text-white text-lg font-poppins">Welcome back!</Text>
                   <Text className="text-white text-2xl font-bold font-potta">{user.full_name}</Text>
@@ -191,7 +187,7 @@ const HomePage = () => {
                 </VStack>
               </HStack>
               
-              <View className="bg-[#A0AEC0] p-3 h-28 w-24 rounded-t-3xl items-center justify-center shadow-lg" style={{
+              <View className="bg-slate-400 p-3 h-28 w-24 rounded-t-3xl items-center justify-center shadow-lg" style={{
                 shadowColor: themeColor,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.1,
@@ -201,7 +197,7 @@ const HomePage = () => {
                   <MaterialCommunityIcons name="truck-delivery" size={20} color="white" />
                 </View>
                 <Text className="text-MainTheme text-sm font-poppins font-extrabold">Orders</Text>
-                <Text className="text-MainTheme font-bold text-xl">{users.ordersCompleted}</Text>
+                <Text className="text-MainTheme font-bold text-xl">0</Text>
               </View>
             </HStack>
           </VStack>
