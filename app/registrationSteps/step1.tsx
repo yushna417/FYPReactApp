@@ -1,4 +1,4 @@
-import {View, Alert, TouchableOpacity, SafeAreaView, Text} from 'react-native';
+import {View,  SafeAreaView, Text, } from 'react-native';
 import {
   FormControl,  
   FormControlLabel,
@@ -12,6 +12,7 @@ import Feather from '@expo/vector-icons/Feather';
 
 import { IUser } from '@/types/userInterface';
 import Toast from 'react-native-simple-toast'
+
 
 interface Step1Props {
   data: IUser;
@@ -56,32 +57,10 @@ const Step1 = forwardRef(({ data, setData }: Step1Props, ref) => {
           isDisabled={false}
           isReadOnly={false}
           isRequired={true}
-        
+          className='gap-y-8 my-6'
         >
-          {/* <View>
-            <FormControlLabel className='mt-6 '>
-              <FormControlLabelText className='text-md font-poppins'>Profile</FormControlLabelText>
-            </FormControlLabel>
-            <HStack className='flex justify-between'>
-
-            <TouchableOpacity onPress={pickFromGallery}
-              className='w-[48%] h-14 border flex flex-row items-center justify-center border-dashed rounded-xl gap-5'>
-              <Entypo name="image-inverted" size={28} color="black"/>
-              <Text className='text-[1.07rem] font-semibold'>Gallery</Text>
-            </TouchableOpacity>
-
-            <Button size="md" variant="solid" action="primary" onPress={takePhoto}
-            className='w-[48%] h-14 border rounded-xl gap-5 bg-MainTheme'>
-              <FontAwesome5 name="camera-retro" size={24} color="white" />
-              <ButtonText className='text-[1.07rem] font-semibold'>Camera</ButtonText>
-            </Button>
-            </HStack>
-            
-
-          </View> */}
-
           <View>
-            <FormControlLabel className='mt-6 '>
+            <FormControlLabel >
               <FormControlLabelText className='text-md font-poppins'>Full Name</FormControlLabelText>
             </FormControlLabel>
             <Input className="rounded-xl px-4 h-14 " >
@@ -95,12 +74,12 @@ const Step1 = forwardRef(({ data, setData }: Step1Props, ref) => {
           </View>
 
           <View>
-            <FormControlLabel className='mt-6 '>
+            <FormControlLabel >
               <FormControlLabelText className='text-md font-poppins'>Phone Number</FormControlLabelText>
             </FormControlLabel>
             <Input className="rounded-xl px-4 h-14 " >
               <Feather name="phone" size={20} color="black" />
-              <InputField placeholder="98*****"            
+              <InputField placeholder="98*****" keyboardType='numeric'           
                 className="text-md ml-2"
                 value={data.phone}
                 onChangeText = {(text) => setData({...data, phone:text})}

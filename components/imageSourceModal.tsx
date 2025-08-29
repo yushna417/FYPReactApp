@@ -2,6 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { takePhoto, pickFromGallery } from '@/utils/useImagePick';
+import { HStack } from './ui/hstack';
 
 const ImageSourceModal = ({ visible, onClose }: { visible: boolean; onClose: () => void }) => {
   return (
@@ -25,21 +26,20 @@ const ImageSourceModal = ({ visible, onClose }: { visible: boolean; onClose: () 
             </Text>
           </View>
           
-          <View className="p-5 flex flex-row justify-between">
+          <HStack space='lg' className="px-5 py-3 flex flex-row justify-end">
             <TouchableOpacity onPress={()=>takePhoto()}
-              className="bg-[#A0AEC0] rounded-xl w-44  py-4 items-center"
+              className="bg-[#A0AEC0] rounded-lg flex-1 py-3  items-center"
               activeOpacity={0.7}
             >
               <Text className="text-white font-semibold text-lg">Camera</Text>
             </TouchableOpacity>
-            
             <TouchableOpacity onPress={()=> pickFromGallery()}
-              className="bg-MainTheme rounded-xl w-44  py-4 items-center"
+              className="bg-MainTheme rounded-lg flex-1 py-3  items-center"
               activeOpacity={0.7}
             >
               <Text className="text-white font-semibold text-lg">Gallery</Text>
             </TouchableOpacity>
-          </View>
+          </HStack>
          
         </View>
       </View>

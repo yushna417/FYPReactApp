@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/form-control";
 import { HStack } from '@/components/ui/hstack';
 import { Input, InputField, InputSlot } from "@/components/ui/input";
-import { Spinner } from "@/components/ui/spinner";
 
 
 
@@ -19,7 +18,6 @@ import { ILoginPayload } from '@/types/loginPayloadInterface';
 import { Role } from '@/types/userInterface';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, Text, TouchableOpacity } from 'react-native';
@@ -130,7 +128,7 @@ const login = () => {
           </FormControlLabel>
           <Input className="rounded-xl px-4 mt-3 h-14" >
             <FontAwesome5 name="user-alt" size={18} color="#2b2b2c" />  
-            <InputField placeholder="98********"            
+            <InputField placeholder="98********" keyboardType="numeric"      
               className="text-md ml-2"
               value={loginData.phone}
               onChangeText={(text) => setLoginData({ ...loginData, phone: text })}

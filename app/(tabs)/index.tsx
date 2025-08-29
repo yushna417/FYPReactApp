@@ -10,10 +10,7 @@ import { IDailyPrice } from '@/types/dailyPriceInterface';
 import { VegetableService } from '@/api/vegetableService';
 import { UserData } from '@/types/userInterface';
 import { checkAuth } from '@/api/auth';
-import { Modal } from 'react-native';
 import React from "react"
-import { Divider } from '@/components/ui/divider';
-import { pickFromGallery, takePhoto } from '@/utils/useImagePick';
 import ImageSourceModal from '@/components/imageSourceModal';
 
 

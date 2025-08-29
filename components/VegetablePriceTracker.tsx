@@ -1,10 +1,10 @@
-// components/VegetablePriceTracker.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
 import { VegetableService } from '@/api/vegetableService';
 import { Box } from './ui/box';
+import { HStack } from './ui/hstack';
 
 interface Props {
   vegetableId: number;
@@ -44,21 +44,24 @@ const VegetablePriceTracker = ({ vegetableId }: Props) => {
 
   return (
     <View className='flex-col gap-2'>
-      <Box className="bg-slate-200 border border-slate-300 px-5 py-3 rounded-xl mb-3 shadow-sm flex-row justify-between items-center">
-      <Text className="font-poppins text-lg font-semibold text-slate-600">
-        Percentage Change
-      </Text>
-     <Text className={`font-poppins text-base font-bold ${latestPrice?.trend === 'up'? 'text-green-500': 'text-red-500'}`}>{latestPrice?.daily_change} %</Text>
-    </Box>
+      <HStack space='lg'>
+      <Box className="bg-slate-200 border border-slate-300 flex-1 px-5 h-28 gap-4 rounded-xl  shadow-sm flex-col justify-center items-center">
+        <Text className="font-poppins text-[23px] font-semibold text-slate-600">
+          Market Snapshot
+        </Text>
+      <Text className={`font-poppins text-base font-bold ${latestPrice?.trend === 'up'? 'text-green-500': 'text-red-500'}`}>{latestPrice?.daily_change} %</Text>
+      </Box>
 
-    <Box className="bg-slate-200 border border-slate-300 px-5 py-3 rounded-xl shadow-sm flex-row justify-between items-center">
-      <Text className="font-poppins text-lg font-semibold text-slate-600">
-        Price Range
-      </Text>
-      <Text className="font-poppins text-base font-semibold text-slate-600">
-        Rs {latestPrice?.min_price} - Rs {latestPrice?.max_price}
-      </Text>
-    </Box>
+      <Box className="bg-slate-200 border border-slate-300 flex-1 px-5 h-28 gap-4 rounded-xl shadow-sm flex-col justify-center items-center">
+        <Text className="font-poppins text-[23px] font-semibold text-slate-600">
+          Price Range
+        </Text>
+        <Text className="font-poppins text-base font-semibold text-slate-600">
+          Rs {latestPrice?.min_price} - Rs {latestPrice?.max_price}
+        </Text>
+      </Box>
+      </HStack>
+    
   
       <Text className='font-poppins text-lg font-bold mt-6 text-MainTheme'>Market Trend</Text>
       <LineChart
@@ -84,11 +87,11 @@ const VegetablePriceTracker = ({ vegetableId }: Props) => {
           propsForDots: {
             r: 5,
             strokeWidth: 2,
-            stroke: '#ffffff' // White dots
+            stroke: '#ffffff'
           },
           propsForBackgroundLines: {
-            strokeDasharray: "5", // Solid lines
-            stroke: 'rgba(255, 255, 255, 0.2)' // Light white grid lines
+            strokeDasharray: "5", 
+            stroke: 'rgba(255, 255, 255, 0.2)' 
           }
         }}
         bezier

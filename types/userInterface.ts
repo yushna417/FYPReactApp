@@ -7,7 +7,7 @@ export interface IUser {
   profile_image?: string | null;
   city: string;
   password: string;
-  date_joined: string;
+  // date_joined: string;
 }
 
 export interface UserData {

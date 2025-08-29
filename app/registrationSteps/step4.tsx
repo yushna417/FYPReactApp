@@ -17,6 +17,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { AlertCircleIcon } from '@/components/ui/icon';
 import { IUser } from '@/types/userInterface';
 import Toast from 'react-native-simple-toast'
+import { useState } from 'react';
+
 
 interface StepProps {
   data: IUser;
@@ -24,28 +26,25 @@ interface StepProps {
 }
 
 const Step4 = forwardRef(({ data, setData }: StepProps, ref) => {
-  const [isInvalid, setIsInvalid] = React.useState(false)
-  const [checkPassword, setCheckPassword] = React.useState("")
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [isPasswordInvalid, setIsPasswordInvalid] = React.useState(false)
+  const [isInvalid, setIsInvalid] = useState(false)
+  const [checkPassword, setCheckPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [isPasswordInvalid, setIsPasswordInvalid] = useState(false)
 
    useImperativeHandle(ref, () => ({
       validate: () => {
         if (!data.password || data.password.length < 8) {
-          // setIsInvalid(true);
           Toast.show('Password must be at least 8 characters.', Toast.LONG, {
           backgroundColor: '#253a6c',
         });
-          // Alert.alert("");
           return false;
         }
 
         if (!checkPassword || data.password !== checkPassword) {
-          // setIsPasswordInvalid(true);
           Toast.show('Passwords do not match. Please try again.', Toast.LONG, {
           backgroundColor: '#253a6c',
         });
-          // Alert.alert("");
           return false;
         }
 
@@ -53,27 +52,13 @@ const Step4 = forwardRef(({ data, setData }: StepProps, ref) => {
       },
     }));
 
-  // React.useEffect(() => {
-
-  //   if (data.password.length < 8) {
-  //     setIsInvalid(true);
-  //   } else {
-  //     setIsInvalid(false);
-  //   }
-
-
-  //   if (checkPassword && data.password !== checkPassword) {
-  //     setIsPasswordInvalid(true);
-  //   } else {
-  //     setIsPasswordInvalid(false);
-  //   }
-  // }, [data.password, checkPassword]);
+  
 
 
   return (
     
     <SafeAreaView className='flex-col py-8 justify-center gap-y-8 font-poppins'>
-      <VStack className="w-full rounded-md ">
+      <VStack space='2xl' className="w-full rounded-md ">
         <FormControl
           isInvalid={isInvalid}
           size="lg"
@@ -97,24 +82,17 @@ const Step4 = forwardRef(({ data, setData }: StepProps, ref) => {
                 className="text-md ml-2"
               />
               <InputSlot onPress={() => setShowPassword(!showPassword)} className='mr-1' >
-                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="gray" />
+                <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color="gray" />
               </InputSlot>
             </Input>
 
-            {!isInvalid && (
               <FormControlHelper accessible>
-              <FormControlHelperText>
+              <FormControlHelperText className='text-sm'>
                 Minimum 8 characters recommended for strong protection.
               </FormControlHelperText>
             </FormControlHelper>
-            )}
             
-            <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>
-                Atleast 8 or more characters are required.
-              </FormControlErrorText>
-            </FormControlError>
+            
           </View>          
         </FormControl>
 
@@ -129,37 +107,30 @@ const Step4 = forwardRef(({ data, setData }: StepProps, ref) => {
 
           
           <View>
-            <FormControlLabel className='mt-6 '>
+            <FormControlLabel >
               <FormControlLabelText className='text-md font-poppins'> Confirm Password</FormControlLabelText>
             </FormControlLabel>
             <Input className=" rounded-xl px-4 h-14 ">
               <FontAwesome5 name="lock" size={18} color="black" />
               <InputField
-                type={showPassword ? "text" : "password"}
+                type={showConfirm ? "text" : "password"}
                 placeholder="••••••••"
                 value={checkPassword}
                 onChangeText={(text) => setCheckPassword(text)}
                 className="text-md ml-2"
               />
-              <InputSlot onPress={() => setShowPassword(!showPassword)} className='mr-1' >
-                <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color="gray" />
+              <InputSlot onPress={() => setShowConfirm(!showConfirm)} className='mr-1' >
+                <Ionicons name={showConfirm ? 'eye-outline' : 'eye-off-outline'} size={20} color="gray" />
               </InputSlot>
             </Input>
 
-            {!isPasswordInvalid && (
               <FormControlHelper>
-              <FormControlHelperText>
+              <FormControlHelperText className='sm'>
                 Re-enter your password to confirm.
               </FormControlHelperText>
             </FormControlHelper>
-            )}
             
-            <FormControlError>
-              <FormControlErrorIcon as={AlertCircleIcon} />
-              <FormControlErrorText>
-               Passwords do not match. Please try again.
-              </FormControlErrorText>
-            </FormControlError>
+          
           </View>
             
 

@@ -10,10 +10,12 @@ import Step3 from './registrationSteps/step3';
 import Step4 from './registrationSteps/step4';
 import { useAuth } from '@/context/useAuth';
 import { Alert } from 'react-native';
+import { HStack } from '@/components/ui/hstack';
 
 const Register = () => {
   const [active, setActive] = useState(0);
   const navigation = useNavigation<any>();
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [registerData, setRegisterData] = useState<IUser>({
     full_name :'',
     phone:'',
@@ -46,6 +48,9 @@ const handleRegister = async () => {
   const isValid = await stepRefs[3].current?.validate();
   if (!isValid) return;
 
+  if (isSubmitting) return;
+  setIsSubmitting(true);
+
   try {
     const { profile_image, ...safeData } = registerData;
     const finalData = profile_image ? { ...registerData } : safeData;
@@ -69,21 +74,23 @@ const handleRegister = async () => {
       'Registration Failed',
       `Something went wrong.\n\n📦 Sent Data:\nFull Name: ${registerData.full_name}\nPhone: ${registerData.phone}\nRole: ${registerData.role}\nCity: ${registerData.city}\nPassword: ${registerData.password}\nProfile Image: ${registerData.profile_image ?? 'null'}\n\n❌ Error: ${JSON.stringify(error?.response?.data || error.message)}`
     );
+  } finally {
+    setIsSubmitting(false)
   }
 };
 
 
   return (
-    <SafeAreaView className='my-36 mx-6 flex-1 flex-col gap-y-8'>
+    <SafeAreaView className='my-32 mx-6 flex-1 flex-col gap-y-5'>
       
-        <View className='flex flex-row justify-between items-center  h-32'>
+      <HStack className='flex flex-row justify-between items-center h-28'>
             <Image source={require('../assets/images/voting_3160315.png' )}
-                  style={{ height: '100%', width: '35%', resizeMode: 'contain' }} className=''/>
+                  style={{ height: '100%', width: '30%', resizeMode: 'contain' }} className=''/>
             <View className='w-72 flex justify-end gap-2'>
                 <Text className='text-4xl font-poppins font-extrabold text-[#253a6c] text-right' >Register</Text>
-                <Text className='text-right font-poppins text-sm leading-4'>"Fill out a few quick details across the next steps to create your account.</Text>
+                <Text className='text-right font-poppins text-sm leading-4'>"Fill out a few quick details across the next steps to create your account."</Text>
             </View>
-      </View>
+      </HStack>
 
       <Stepper
         active={active}
