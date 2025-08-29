@@ -1,8 +1,8 @@
 import apiClient from "./axios"
 import { ILoginPayload } from "@/types/loginPayloadInterface"
 import { IUser, UserData } from "@/types/userInterface"
-import {BASE_URL} from './axios'
 import { Role } from "@/types/userInterface"
+import { BASE_URL } from "@/apikey"
 
 export const Login_URL = `${BASE_URL}token/`
 export const Refresh_URL = `${BASE_URL}token/refresh/`

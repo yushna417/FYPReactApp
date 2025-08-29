@@ -1,4 +1,3 @@
-// screens/VegetableScreen.tsx
 import React, { useState, useEffect } from 'react';
 import {Text,  View, FlatList, TouchableOpacity } from 'react-native';
 import { Spinner } from '@/components/ui/spinner';
@@ -81,7 +80,7 @@ const VegetableScreen = () => {
   };
 
   return (
-    <View className="flex-1 px-7  relative bg-slate-100 gap-5">
+    <View className="flex-1 px-7 relative bg-[#f6f7f9] gap-5">
       <View className='bg-MainTheme -mx-7 pt-24 pb-10 px-7'>
         <Text className="text-3xl font-black mb-6 text-white font-poppins text-center">Vegetable Price Tracker</Text>
       

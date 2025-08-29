@@ -16,11 +16,11 @@ const App = () => {
           style={{width: '100%', height: 400}}
         />
         <HStack space='xl' className='flex justify-between w-full px-3'>
-            <Button size="xl" className='w-48 h-16 rounded-2xl bg-[#243c6b]' variant="solid" action="primary"
+            <Button size="xl" className='flex-1 h-16 rounded-2xl bg-[#243c6b]' variant="solid" action="primary"
             onPress={()=> navigation.navigate('register')}>
                 <ButtonText>Sign up</ButtonText>
             </Button>
-            <Button size="xl" className='w-48 h-16 rounded-2xl border-[#243c6b] border-2 text-[#243c6b]' variant="outline" action="primary"
+            <Button size="xl" className='flex-1 h-16 rounded-2xl border-[#243c6b] border-2 text-[#243c6b]' variant="outline" action="primary"
             onPress={()=> navigation.navigate('login')}>
                 <ButtonText>Log in</ButtonText>
             </Button>
