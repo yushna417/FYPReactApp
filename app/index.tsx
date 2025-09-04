@@ -7,8 +7,8 @@ const index = () => {
 
   useEffect(() => {
     const timer = setTimeout(()=>{
-      router.replace('/OnBoardingPage');
-    }, 2000);
+      router.replace('/(auth)/onBoardingPage');
+    }, 3000);
 
     return () => clearTimeout(timer)
   }, []);

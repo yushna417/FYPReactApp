@@ -7,7 +7,7 @@ import { Box } from '@/components/ui/box';
 import { VStack } from '@/components/ui/vstack';
 import { VegetableService } from '@/api/vegetableService';
 import { IVeg } from '@/types/vegetableInterface';
-import VegetablePriceTracker from '@/components/VegetablePriceTracker';
+import VegetablePriceTracker from '@/components/modules/VegetablePriceTracker';
 import { Ionicons } from '@expo/vector-icons';
 
 type RootStackParamList = {
@@ -82,14 +82,12 @@ const VegetableScreen = () => {
   return (
     <View className="flex-1 px-7 relative bg-[#f6f7f9] gap-5">
       <View className='bg-MainTheme -mx-7 pt-24 pb-10 px-7'>
-        <Text className="text-3xl font-black mb-6 text-white font-poppins text-center">Vegetable Price Tracker</Text>
+        <Text className="text-3xl font-black mb-6 text-white font-poppins text-left">Vegetable Price Tracker</Text>
       
-      <VStack space="md" className="mb-4 border-slate-300 border px-4 py-8 rounded-lg bg-white" 
+      <VStack space="md" className="mb-4 border-l-slate-50 pe-5 py-8 rounded-xl " 
       style={{boxShadow: " 7px 7px 7px #0b1829",}}>        
-          <View >
-            <Text className='font-poppins font-bold text-xl text-MainTheme text-center'>Enter Vegetable Name</Text>
-          </View>
-          <Input className="rounded-xl mt-1 h-14 px-2" >
+        
+          <Input className="rounded-xl mt-1 h-14 px-2 bg-white" >
             <InputField  size='lg'           
               className="text-md font-poppins "
               value={query}

@@ -7,11 +7,12 @@ import { FontAwesome5, MaterialCommunityIcons, MaterialIcons, Octicons} from '@e
 import { useNavigation } from 'expo-router';
 import { useState, useRef, useEffect } from 'react';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
+// import { VegetableService } from '@/api/vegetableService';
 import { VegetableService } from '@/api/vegetableService';
 import { UserData } from '@/types/userInterface';
 import { checkAuth } from '@/api/auth';
 import React from "react"
-import ImageSourceModal from '@/components/imageSourceModal';
+import ImageSourceModal from '@/components/modules/imageSourceModal';
 
 
 const HomePage = () => {
