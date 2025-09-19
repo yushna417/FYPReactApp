@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@font-face {
+  font-family: "SpaceMono";
+  src: url("./assets/fonts/SpaceMono-Regular.ttf");
+}
+
+@font-face {
+  font-family: "PottaOne";
+  src: url("./assets/fonts/PottaOne-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url("./assets/fonts/Poppins-Regular.ttf");
+}
+
+.font-space {
+  font-family: "SpaceMono";
+}
+
+.font-potta {
+  font-family: "PottaOne";
+}
+
+.font-poppins {
+  font-family: "Poppins";
+}

@@ -1,98 +1,349 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Easing, ActivityIndicator, Alert} from 'react-native';
+import { Box } from '@/components/ui/box';
+import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
+import { FontAwesome5, MaterialCommunityIcons, MaterialIcons, Octicons} from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
+import { useState, useRef, useEffect } from 'react';
+import { IDailyPrice } from '@/types/dailyPriceInterface';
+import { VegetableService } from '@/api/vegetableService';
+import { UserData } from '@/types/userInterface';
+import { checkAuth } from '@/api/auth';
+import React from "react"
+import Animated, {useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming} from 'react-native-reanimated';
+import ImageSourceModal from '@/components/modules/imageSourceModal';
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
 
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
+const HomePage = () => {
+  const themeColor = '#253a6c';
+  const navigation = useNavigation<any>();
+  const [trendingData, setTrendingData] = useState<{
+    surging: IDailyPrice[];
+    dropping: IDailyPrice[];
+  }>({ surging: [], dropping: [] });
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserData | null> (null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [showModal, setShowModal] = useState(false)
+  const pulse = useSharedValue(1);
 
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try{
+        setLoading(true);
+        const [pricesResponse, veggiesResponse] = await Promise.all([
+          VegetableService.getLatestPrices(),
+          VegetableService.getAllVegetables()
+        ]);
+
+        const vegMap = new Map(
+          veggiesResponse.map(veg => [veg.id, veg])
+        );
+
+        const processedPrices = pricesResponse.map(price => ({
+          ...price,
+          vegetable:vegMap.get(
+            typeof price.vegetable === 'number' 
+            ? price.vegetable
+            : price.vegetable.id) || {id:0, name:'Unknown', unit:'unit'}
+        }));
+
+        const surging = processedPrices
+          .filter(p => p.trend === 'up')
+          .sort((a, b) => (b.daily_change || 0) - (a.daily_change || 0))
+          .slice(0, 5);
+        
+        const dropping = processedPrices
+          .filter(p => p.trend === 'down')
+          .sort((a, b) => (a.daily_change || 0) - (b.daily_change || 0))
+          .slice(0, 5);
+        
+        setTrendingData({ surging, dropping });
+    }
+     catch (error) {
+      console.error ('Failed to fetch data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+   fetchData();  
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const authResult = await checkAuth();
+        if (authResult.isAuthenticated && authResult.user){
+          setUser(authResult.user)
+        } else{
+          Alert.alert('Authentication Error', "You are not authenicated to view this page")
+        }
+      } catch(error:any){
+        console.log('Error fetching user data:', error)
+        Alert.alert('Authentication Error', "An error occurred during authentication.");
+      } finally {
+        setLoading(false)
+        setIsCheckingAuth(false)
+      }
+      
+    }
+  
+    fetchUserData();
+  }, [])
+
+  useEffect(() => {
+  pulse.value = withRepeat(
+    withSequence(
+      withTiming(1.03, { duration: 1000 }),
+      withTiming(1, { duration: 1000 })
+    ),
+    -1, // infinite
+    true
   );
-}
+}, []);
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+const animatedStyle = useAnimatedStyle(() => ({
+  transform: [{ scale: pulse.value }],
+}));
+  
+  if (isCheckingAuth) {
+    return <ActivityIndicator />
+  }
+
+  if (!user){
+    return null
+  }
+   
+
+  if (loading) {
+    return <ActivityIndicator size="large" />;
+  }
+
+  return (
+    <GluestackUIProvider>
+      <Box style={{ flex: 1, backgroundColor: '#DDE3E6'}} >
+        <ScrollView showsVerticalScrollIndicator={false} className='bg-slate-100 '>
+          <View  className='px-5 pt-14  rounded-b-2xl bg-MainTheme flex flex-col gap-y-5'>
+             <View className="absolute -right-1 z-20 -top-10 w-32 h-32 bg-white opacity-10 rounded-full"></View>
+              <View className="absolute -right-5 -bottom-5 w-20 h-20 bg-white opacity-10 rounded-full"></View>
+            <View className='flex items-center rounded-xl justify-between flex-row gap-x-5'>
+              <View  className='flex flex-row gap-x-5 py-3 w-[21rem] rounded-xl ps-1 h-28 relative overflow-hidden bg-MainTheme'
+              style={{
+                shadowColor: themeColor,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 6,
+              }}>
+                
+                <TouchableOpacity onPress={() => setShowModal(true)}>
+                  {user.profile_image ? (
+                    <Image
+                      source={{ uri: user.profile_image }}
+                      style={{
+                        width: 75,
+                        height: 75,
+                        borderRadius: 16,
+                        borderWidth: 3,
+                        borderColor: 'white',
+                      }}
+                    />
+                  ) : (
+                    <View 
+                    style={{
+                      width: 75,
+                      height: 75,
+                      borderRadius: 16,
+                      borderWidth: 3,
+                      borderColor: 'white',
+                      backgroundColor: '#A0AEC0', // Light gray background
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                      <Octicons name="device-camera" size={32} color="white" />
+                    </View>
+                  )}
+                </TouchableOpacity>
+               
+               <ImageSourceModal
+               visible = {showModal}
+               onClose={()=> setShowModal(false)}/>
+
+                <View className='flex flex-col' >
+                  <Text className="text-white text-lg font-poppins">Welcome back!</Text>
+                  <Text className="text-white text-2xl font-bold font-potta">{user.full_name}</Text>
+                  <View className="items-center mt-1">
+                    <Text className="text-white text-xs">Member since {user.date_joined}</Text>
+                  </View>
+                </View>
+              </View>
+              
+              <View className="bg-slate-400 p-3 h-28 w-24 rounded-t-3xl items-center justify-center " style={{
+                shadowColor: themeColor,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 6,
+              }}>
+                <View className="bg-MainTheme p-1 rounded-full mb-1">
+                  <MaterialCommunityIcons name="truck-delivery" size={20} color="white" />
+                </View>
+                <Text className="text-MainTheme text-sm font-poppins font-extrabold">Orders</Text>
+                <Text className="text-MainTheme font-bold text-xl">0</Text>
+              </View>
+            </View>
+          </View>
+
+          <View className="px-5 pt-6"
+          style={{
+              shadowColor: themeColor,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: 10,
+            }}>
+            <View className="relative h-72 rounded-2xl  overflow-hidden flex flex-row " >
+              <Image 
+                source={require('../../assets/images/projectImages/map.jpeg')}
+                className="w-[61%] h-full"
+                resizeMode="cover"
+              />
+              
+              <View className="w-[40%] h-full bg-[#93c6e1] flex flex-row justify-center pr-3 relative">
+                <Text className="text-MainTheme text-xl leading-6 font-bold  text-right pr-5 pt-14 -ml-10 font-poppins relative z-10">
+                  Fresh vegetables delivered to your doorstep within hours
+                </Text>
+              </View>
+              
+              {/* <Animated.View 
+                style={{
+                  transform: [{ scale: pulseAnim }],
+                  position: 'absolute',
+                  bottom: 30,
+                  left: 0,
+                  right: 0,
+                  alignItems: 'center',
+                }}
+              >
+                <TouchableOpacity
+                  // className="px-5 py-3 rounded-full flex-row items-center justify-center"
+                  activeOpacity={0.7}
+                  style={{
+                    backgroundColor: themeColor,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 6 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 12,
+                    elevation: 12,
+                    borderWidth: 2,
+                    borderColor: 'rgba(255,255,255,0.3)',
+                  }}
+                >
+                  <View className="bg-white p-2 rounded-full mr-3">
+                    <FontAwesome5 name="cart-plus" size={20} color={themeColor} />
+                  </View>
+                  <Text className="text-white font-bold text-lg">ORDER NOW</Text>
+                  <View className="ml-2 w-2 h-2 bg-white rounded-full animate-ping opacity-75"></View>
+                </TouchableOpacity>
+              </Animated.View> */}
+
+               <Animated.View
+                  style={animatedStyle}
+                  className="absolute bottom-9 right-8 items-center"
+                >
+                  <TouchableOpacity className='py-3 px-5 rounded-full bg-MainTheme flex flex-row items-center'
+                          style={{boxShadow: " 7px 7px 7px #1c2a44",}}>
+                              <View className="bg-white p-2 rounded-full mr-3">
+                                  <FontAwesome5 name="cart-plus" size={20} color={themeColor} />
+                                </View>
+                              <Text className='text-white font-jakarta font-semibold text-xl '>Order Now</Text>
+                              <View className="ml-5 w-2 h-2 bg-white/40 rounded-full opacity-75"></View>
+                              <View className="ml-2 w-2 h-2 bg-white rounded-full opacity-75"></View>
+                              <View className="ml-2 w-2 h-2 bg-white/40 rounded-full opacity-75"></View>
+                            </TouchableOpacity>
+                </Animated.View>
+              
+             
+             
+
+
+            </View>
+          </View>
+
+          <View className="px-5 pt-6">
+            <View className="items-center justify-between mb-4 flex flex-row">
+              <Text className="text-xl font-bold" style={{ color: themeColor }}>
+                Market Trends
+              </Text>
+              <TouchableOpacity className="flex-row items-center" onPress={()=> navigation.navigate("Analytics")}>
+                <Text className="text-MainTheme text-sm mr-1">View All</Text>
+                <MaterialIcons name="arrow-forward-ios" size={14} color={themeColor} />
+              </TouchableOpacity>
+            </View>
+            
+            <View className="w-full flex flex-row gap-x-5">
+              <View className="flex-1 rounded-xl"
+              style={{
+                     boxShadow: " 7px 7px 7px #d9d9e1",
+              }}>
+                <View className="bg-[#4CAF70] p-2.5 rounded-t-xl border-b-2 border-green-100 ">
+                  <View className="items-center justify-between flex  flex-row">
+                    <Text className="font-bold text-lg  text-white">Price Surge</Text>
+                    <View className="bg-green-100 p-1.5 rounded-full">
+                      <MaterialIcons name="trending-up" size={20} color="#10B981" />
+                    </View>
+                  </View>
+                </View>
+                <View className="bg-gray-50 pt-2 px-3 rounded-b-xl flex flex-col gap-y-2"  >
+                  {trendingData.surging.map((veg) => (
+                    <TouchableOpacity onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
+                     key={veg.id} className=" pb-2 border-b-2 border-gray-200">
+                      <View className="items-center justify-between flex flex-row">
+                        <Text className="font-medium text-gray-800 text-[0.9rem] w-32" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
+                        <View className="items-center bg-[#4CAF70] py-1 rounded-xl justify-center w-14 flex">
+                          <Text className="text-white font-bold text-xs">+{veg.daily_change !== null ? veg.daily_change.toFixed(1):"0.0"}%</Text>
+                        </View>
+                      </View>
+                      <Text className="text-gray-500 text-xs">Rs {veg.avg_price} /{veg.vegetable.unit}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View className="flex-1 rounded-xl"
+              style={{
+                     boxShadow: " 7px 7px 7px #d9d9e1",
+
+              }}>
+                <View className=" p-2.5 rounded-t-xl border-b-2 border-red-100 bg-[#cf2233]" >
+                  <View className="items-center justify-between flex flex-row">
+                    <Text className="font-bold text-lg text-white">Price Drop</Text>
+                    <View className="bg-red-100 p-1.5 rounded-full">
+                      <MaterialIcons name="trending-down" size={20} color="#EF4444" />
+                    </View>
+                  </View>
+                </View>
+                <View className="bg-white pt-2 px-3 rounded-b-xl flex flex-col gap-y-2" >
+                  {trendingData.dropping.map((veg) => (
+                    <TouchableOpacity onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
+                     key={veg.id} className="pb-2 border-b-2 border-gray-200 ">
+                      <View className="items-center justify-between flex flex-row">
+                        <Text className="font-medium text-gray-800 text-[0.9rem] w-32" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
+                        <View className="items-center justify-center flex bg-[#cf2233] py-1 rounded-2xl w-14">
+                        <Text className="text-white font-bold text-xs">{veg.daily_change !== null ? veg.daily_change.toFixed(1):"0.0"}%</Text>
+                        </View>
+                      </View>
+                      <Text className="text-gray-500 text-xs">Rs {veg.avg_price} /{veg.vegetable.unit}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            </View>
+          </View>
+
+         
+        </ScrollView>
+      </Box>
+    </GluestackUIProvider>
+  );
+};
+
+export default HomePage;
