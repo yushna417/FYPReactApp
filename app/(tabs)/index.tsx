@@ -1,7 +1,7 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Easing, ActivityIndicator, Alert} from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Pressable, ActivityIndicator, Alert} from 'react-native';
 import { Box } from '@/components/ui/box';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { FontAwesome5, MaterialCommunityIcons, MaterialIcons, Octicons} from '@expo/vector-icons';
+import { FontAwesome, FontAwesome5, MaterialCommunityIcons, MaterialIcons, Octicons} from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { useState, useRef, useEffect } from 'react';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
@@ -23,9 +23,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<UserData | null> (null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [showModal, setShowModal] = useState(false)
   const pulse = useSharedValue(1);
-
 
 
   useEffect(() => {
@@ -85,27 +83,25 @@ const HomePage = () => {
       } finally {
         setLoading(false)
         setIsCheckingAuth(false)
-      }
-      
-    }
-  
+      }      
+    }  
     fetchUserData();
   }, [])
 
   useEffect(() => {
-  pulse.value = withRepeat(
-    withSequence(
-      withTiming(1.03, { duration: 1000 }),
-      withTiming(1, { duration: 1000 })
-    ),
-    -1, // infinite
-    true
-  );
-}, []);
+    pulse.value = withRepeat(
+      withSequence(
+        withTiming(1.03, { duration: 1000 }),
+        withTiming(1, { duration: 1000 })
+      ),
+      -1, // infinite
+      true
+    );
+  }, []);
 
-const animatedStyle = useAnimatedStyle(() => ({
-  transform: [{ scale: pulse.value }],
-}));
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulse.value }],
+  }));
   
   if (isCheckingAuth) {
     return <ActivityIndicator />
@@ -136,7 +132,7 @@ const animatedStyle = useAnimatedStyle(() => ({
                 shadowRadius: 6,
               }}>
                 
-                <TouchableOpacity onPress={() => setShowModal(true)}>
+                <TouchableOpacity onPress={()=> navigation.navigate('settings')}>
                   {user.profile_image ? (
                     <Image
                       source={{ uri: user.profile_image }}
@@ -149,30 +145,26 @@ const animatedStyle = useAnimatedStyle(() => ({
                       }}
                     />
                   ) : (
-                    <View 
-                    style={{
-                      width: 75,
-                      height: 75,
-                      borderRadius: 16,
-                      borderWidth: 3,
-                      borderColor: 'white',
-                      backgroundColor: '#A0AEC0', // Light gray background
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                    }}>
-                      <Octicons name="device-camera" size={32} color="white" />
-                    </View>
+                    <Image
+            source={{ uri: "https://thumbs.dreamstime.com/b/man-profile-cartoon-smiling-round-icon-vector-illustration-graphic-design-135443422.jpg" }} // random image
+                      style={{
+                        width: 75,
+                        height: 75,
+                        borderRadius: 16,
+                        borderWidth: 3,
+                        borderColor: 'white',
+                      }}
+                    />
                   )}
+                 
                 </TouchableOpacity>
                
-               <ImageSourceModal
-               visible = {showModal}
-               onClose={()=> setShowModal(false)}/>
+               
 
                 <View className='flex flex-col' >
                   <Text className="text-white text-lg font-poppins">Welcome back!</Text>
                   <Text className="text-white text-2xl font-bold font-potta">{user.full_name}</Text>
-                  <View className="items-center mt-1">
+                  <View className=" mt-1">
                     <Text className="text-white text-xs">Member since {user.date_joined}</Text>
                   </View>
                 </View>
@@ -213,38 +205,6 @@ const animatedStyle = useAnimatedStyle(() => ({
                 </Text>
               </View>
               
-              {/* <Animated.View 
-                style={{
-                  transform: [{ scale: pulseAnim }],
-                  position: 'absolute',
-                  bottom: 30,
-                  left: 0,
-                  right: 0,
-                  alignItems: 'center',
-                }}
-              >
-                <TouchableOpacity
-                  // className="px-5 py-3 rounded-full flex-row items-center justify-center"
-                  activeOpacity={0.7}
-                  style={{
-                    backgroundColor: themeColor,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 6 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 12,
-                    elevation: 12,
-                    borderWidth: 2,
-                    borderColor: 'rgba(255,255,255,0.3)',
-                  }}
-                >
-                  <View className="bg-white p-2 rounded-full mr-3">
-                    <FontAwesome5 name="cart-plus" size={20} color={themeColor} />
-                  </View>
-                  <Text className="text-white font-bold text-lg">ORDER NOW</Text>
-                  <View className="ml-2 w-2 h-2 bg-white rounded-full animate-ping opacity-75"></View>
-                </TouchableOpacity>
-              </Animated.View> */}
-
                <Animated.View
                   style={animatedStyle}
                   className="absolute bottom-9 right-8 items-center"
@@ -259,12 +219,7 @@ const animatedStyle = useAnimatedStyle(() => ({
                               <View className="ml-2 w-2 h-2 bg-white rounded-full opacity-75"></View>
                               <View className="ml-2 w-2 h-2 bg-white/40 rounded-full opacity-75"></View>
                             </TouchableOpacity>
-                </Animated.View>
-              
-             
-             
-
-
+                </Animated.View>           
             </View>
           </View>
 
@@ -294,7 +249,7 @@ const animatedStyle = useAnimatedStyle(() => ({
                 </View>
                 <View className="bg-gray-50 pt-2 px-3 rounded-b-xl flex flex-col gap-y-2"  >
                   {trendingData.surging.map((veg) => (
-                    <TouchableOpacity onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
+                    <Pressable onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
                      key={veg.id} className=" pb-2 border-b-2 border-gray-200">
                       <View className="items-center justify-between flex flex-row">
                         <Text className="font-medium text-gray-800 text-[0.9rem] w-32" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
@@ -303,16 +258,13 @@ const animatedStyle = useAnimatedStyle(() => ({
                         </View>
                       </View>
                       <Text className="text-gray-500 text-xs">Rs {veg.avg_price} /{veg.vegetable.unit}</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   ))}
                 </View>
               </View>
 
               <View className="flex-1 rounded-xl"
-              style={{
-                     boxShadow: " 7px 7px 7px #d9d9e1",
-
-              }}>
+              style={{boxShadow: " 7px 7px 7px #d9d9e1"}}>
                 <View className=" p-2.5 rounded-t-xl border-b-2 border-red-100 bg-[#cf2233]" >
                   <View className="items-center justify-between flex flex-row">
                     <Text className="font-bold text-lg text-white">Price Drop</Text>
@@ -323,7 +275,7 @@ const animatedStyle = useAnimatedStyle(() => ({
                 </View>
                 <View className="bg-white pt-2 px-3 rounded-b-xl flex flex-col gap-y-2" >
                   {trendingData.dropping.map((veg) => (
-                    <TouchableOpacity onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
+                    <Pressable onPress={() => navigation.navigate('Analytics', { vegetable: veg.vegetable.name })}
                      key={veg.id} className="pb-2 border-b-2 border-gray-200 ">
                       <View className="items-center justify-between flex flex-row">
                         <Text className="font-medium text-gray-800 text-[0.9rem] w-32" numberOfLines={1} ellipsizeMode="tail">{veg.vegetable.name}</Text>
@@ -332,7 +284,7 @@ const animatedStyle = useAnimatedStyle(() => ({
                         </View>
                       </View>
                       <Text className="text-gray-500 text-xs">Rs {veg.avg_price} /{veg.vegetable.unit}</Text>
-                    </TouchableOpacity>
+                    </Pressable>
                   ))}
                 </View>
               </View>

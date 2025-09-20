@@ -1,7 +1,6 @@
 
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
-import Constants from "expo-constants";
 import { BASE_URL } from '@/apikey';
 
 const apiClient = axios.create({

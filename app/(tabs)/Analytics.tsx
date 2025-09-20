@@ -83,8 +83,8 @@ const VegetableScreen = () => {
 
   return (
     <View className="flex-1 px-7 relative bg-[#f6f7f9] gap-5">
-      <View className='bg-MainTheme -mx-7 pt-24 pb-10 px-7'>
-        <Text className="text-3xl font-black mb-6 text-white font-poppins text-left">Vegetable Price Tracker</Text>
+      <View className={`bg-MainTheme -mx-7 pt-24 pb-10 px-7 ${selectedVegetable ? "h-auto" :'h-2/5'}`}>
+        <Text className="text-3xl font-black mb-6 text-white font-poppins text-left mx-auto">Vegetable Price Tracker</Text>
       
       <View  className="mb-4 border-l-slate-50 pe-5 py-8 rounded-xl flex flex-col gap-y-5" 
       style={{boxShadow: " 7px 7px 7px #0b1829",}}>        
@@ -104,33 +104,6 @@ const VegetableScreen = () => {
           )}
             
           </Input>
-
-
-        {/* {showSuggestions && filteredVegetables.length > 0 && (
-          <Box className="border border-gray-300 rounded-lg bg-white shadow-md max-h-48">
-            <FlatList
-              data={filteredVegetables}
-              keyExtractor={item => item.id.toString()}
-              renderItem={({ item }) => (
-                <TouchableOpacity 
-                  onPress={() => handleSelect(item)} 
-                  className="px-4 py-3 border-b border-gray-100 active:bg-gray-100"
-                >
-                  <Text className="text-gray-800">
-                    {item.name} / {item.unit && `(${item.unit})`}
-                  </Text>
-                </TouchableOpacity>
-              )}
-              keyboardShouldPersistTaps="handled"
-            />
-          </Box>
-        )}
-
-        {showSuggestions && query.length > 0 && filteredVegetables.length === 0 && (
-          <Box className="px-4 py-3 border border-gray-300 rounded-lg bg-white">
-            <Text className="text-gray-500">No vegetables found</Text>
-          </Box>
-        )} */}
 
         <VegetableSuggestions
           showSuggestions={showSuggestions}

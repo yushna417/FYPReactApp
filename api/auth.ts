@@ -15,7 +15,6 @@ export type TokenResponse = {
   refresh: string;
 }
 
-
 export const login = async (data: ILoginPayload):  Promise<TokenResponse & { role: Role }> => {
   const response = await apiClient.post(Login_URL, data);
   return response.data;
