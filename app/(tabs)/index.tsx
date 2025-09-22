@@ -1,16 +1,17 @@
-import { View, Text, Image, ScrollView, TouchableOpacity, Pressable, ActivityIndicator, Alert} from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Pressable, ActivityIndicator, Alert,} from 'react-native';
 import { Box } from '@/components/ui/box';
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider';
-import { FontAwesome, FontAwesome5, MaterialCommunityIcons, MaterialIcons, Octicons} from '@expo/vector-icons';
+import { FontAwesome5, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
 import { VegetableService } from '@/api/vegetableService';
 import { UserData } from '@/types/userInterface';
 import { checkAuth } from '@/api/auth';
 import React from "react"
 import Animated, {useSharedValue, useAnimatedStyle, withRepeat, withSequence, withTiming} from 'react-native-reanimated';
-import ImageSourceModal from '@/components/modules/imageSourceModal';
+import OrderActionSheet from '@/components/modules/orderActionSheet';
+import BottomSheet from '@gorhom/bottom-sheet';
 
 
 const HomePage = () => {
@@ -24,6 +25,16 @@ const HomePage = () => {
   const [user, setUser] = useState<UserData | null> (null);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const pulse = useSharedValue(1);
+  const sheetRef = useRef<BottomSheet>(null);
+
+  const openSheet = () => {
+    sheetRef.current?.expand();
+  }
+
+  const closeSheet = () => {
+    sheetRef.current?.close();
+  }
+  
 
 
   useEffect(() => {
@@ -79,7 +90,8 @@ const HomePage = () => {
         }
       } catch(error:any){
         console.log('Error fetching user data:', error)
-        Alert.alert('Authentication Error', "An error occurred during authentication.");
+        Alert.alert('Authentication Error', "An error occurred during authentication. Please re-login");
+        navigation.navigate("login")
       } finally {
         setLoading(false)
         setIsCheckingAuth(false)
@@ -120,6 +132,7 @@ const HomePage = () => {
     <GluestackUIProvider>
       <Box style={{ flex: 1, backgroundColor: '#DDE3E6'}} >
         <ScrollView showsVerticalScrollIndicator={false} className='bg-slate-100 '>
+          
           <View  className='px-5 pt-14  rounded-b-2xl bg-MainTheme flex flex-col gap-y-5'>
              <View className="absolute -right-1 z-20 -top-10 w-32 h-32 bg-white opacity-10 rounded-full"></View>
               <View className="absolute -right-5 -bottom-5 w-20 h-20 bg-white opacity-10 rounded-full"></View>
@@ -132,7 +145,7 @@ const HomePage = () => {
                 shadowRadius: 6,
               }}>
                 
-                <TouchableOpacity onPress={()=> navigation.navigate('settings')}>
+                <TouchableOpacity activeOpacity={0.7} delayPressIn={0}  onPress={()=> navigation.navigate('settings')}>
                   {user.profile_image ? (
                     <Image
                       source={{ uri: user.profile_image }}
@@ -207,10 +220,10 @@ const HomePage = () => {
               
                <Animated.View
                   style={animatedStyle}
-                  className="absolute bottom-9 right-8 items-center"
+                  className="absolute bottom-9 right-8 items-center" 
                 >
-                  <TouchableOpacity className='py-3 px-5 rounded-full bg-MainTheme flex flex-row items-center'
-                          style={{boxShadow: " 7px 7px 7px #1c2a44",}}>
+                  <Pressable className='py-3 px-5 rounded-full bg-MainTheme flex flex-row items-center' android_ripple={{ color: "gray" }}
+                    style={{ boxShadow: " 7px 7px 7px #1c2a44",}} onPress={openSheet} >
                               <View className="bg-white p-2 rounded-full mr-3">
                                   <FontAwesome5 name="cart-plus" size={20} color={themeColor} />
                                 </View>
@@ -218,11 +231,10 @@ const HomePage = () => {
                               <View className="ml-5 w-2 h-2 bg-white/40 rounded-full opacity-75"></View>
                               <View className="ml-2 w-2 h-2 bg-white rounded-full opacity-75"></View>
                               <View className="ml-2 w-2 h-2 bg-white/40 rounded-full opacity-75"></View>
-                            </TouchableOpacity>
-                </Animated.View>           
+                            </Pressable>
+                </Animated.View>
             </View>
           </View>
-
           <View className="px-5 pt-6">
             <View className="items-center justify-between mb-4 flex flex-row">
               <Text className="text-xl font-bold" style={{ color: themeColor }}>
@@ -294,6 +306,8 @@ const HomePage = () => {
          
         </ScrollView>
       </Box>
+      <OrderActionSheet sheetRef={sheetRef} close={closeSheet} />
+
     </GluestackUIProvider>
   );
 };

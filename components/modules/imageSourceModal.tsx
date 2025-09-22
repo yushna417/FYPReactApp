@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
-import { takePhoto, pickFromGallery } from '@/utils/useImagePick';
+import { takePhoto, pickFromGallery } from '@/hooks/useImagePick';
 // import { HStack } from '../ui/hstack';
 
 

@@ -4,12 +4,13 @@ import { Spinner } from '@/components/ui/spinner';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { Input, InputField, InputSlot } from '@/components/ui/input';
 import { Box } from '@/components/ui/box';
-// import { VStack } from '@/components/ui/vstack';
 import { VegetableService } from '@/api/vegetableService';
 import { IVeg } from '@/types/vegetableInterface';
 import VegetablePriceTracker from '@/components/modules/VegetablePriceTracker';
 import { Ionicons } from '@expo/vector-icons';
 import VegetableSuggestions from '@/components/modules/vegetableSuggestion';
+import { IDailyPrice } from '@/types/dailyPriceInterface';
+import { ReceivePrice } from '@/types/dailyPriceInterface';
 
 
 type RootStackParamList = {
@@ -27,6 +28,7 @@ const VegetableScreen = () => {
   const [selectedVegetable, setSelectedVegetable] = useState<IVeg | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [todayVeg, setTodayVeg] = useState<ReceivePrice[]>([])
 
   useEffect(() => {
     const loadVegetables = async () => {
@@ -34,6 +36,9 @@ const VegetableScreen = () => {
       try {
         const data = await VegetableService.getAllVegetables();
         setVegetables(data);
+
+        const currentVeg = await VegetableService.getPriceOnly();
+        setTodayVeg(currentVeg)
 
          if (passedVegetableName) {
           const foundVeg = data.find(v => 
@@ -81,6 +86,16 @@ const VegetableScreen = () => {
     setShowSuggestions(false);
   };
 
+  const todayVegetableIds = todayVeg.map((t) => t.vegetable);
+
+  const isVegetableAvailable =
+    selectedVegetable !== null &&
+    todayVegetableIds.includes(selectedVegetable.id);
+
+  const hasSelectedVegetable = selectedVegetable !== null;
+
+
+
   return (
     <View className="flex-1 px-7 relative bg-[#f6f7f9] gap-5">
       <View className={`bg-MainTheme -mx-7 pt-24 pb-10 px-7 ${selectedVegetable ? "h-auto" :'h-2/5'}`}>
@@ -116,27 +131,35 @@ const VegetableScreen = () => {
       </View>
       
 
-      {isLoading && (
-        <Box className="items-center justify-center py-8 absolute">
-          <Spinner size="large" />
-          <Text className="mt-2 text-gray-600">Loading vegetables...</Text>
-        </Box>
-      )}
+    {isLoading && (
+      <Box className="items-center justify-center py-8 absolute">
+        <Spinner size="large" />
+        <Text className="mt-2 text-gray-600">Loading vegetables...</Text>
+      </Box>
+    )}
 
-      {selectedVegetable && (
-        <View className='flex-col gap-2'>
-          
-          <VegetablePriceTracker vegetableId={selectedVegetable.id} />
-        </View>
-      )}
+    {hasSelectedVegetable && isVegetableAvailable && (
+      <View className="flex-col gap-2">
+        <VegetablePriceTracker vegetableId={selectedVegetable.id} />
+      </View>
+    )}
 
-      {!selectedVegetable && !isLoading && (
-        <Box className="items-center justify-center py-12">
-          <Text className="text-gray-500 text-center">
-            Search for a vegetable above to track its prices
-          </Text>
-        </Box>
-      )}
+    {!hasSelectedVegetable && !isLoading && (
+      <Box className="items-center justify-center py-12">
+        <Text className="text-gray-500 text-center">
+          Search for a vegetable above to track its prices
+        </Text>
+      </Box>
+    )}
+
+    {hasSelectedVegetable && !isVegetableAvailable && !isLoading && (
+      <Box className="items-center justify-center py-12">
+        <Text className="text-gray-500 text-center">
+          Out of season at the moment. Availability will resume in its harvest period. 
+        </Text>
+      </Box>
+    )}
+
     </View>
   );
 };

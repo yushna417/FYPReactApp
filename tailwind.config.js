@@ -184,6 +184,8 @@ module.exports = {
         code: ['var(--font-source-code-pro)'],
         inter: ['var(--font-inter)'],
         'space-mono': ['var(--font-space-mono)'],
+        potta: ["PottaOne"],
+        poppins:["Poppins"]
       },
       fontWeight: {
         extrablack: '950',

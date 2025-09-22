@@ -19,7 +19,8 @@ import {
   SelectItem } from '@/components/ui/select';
   import { ChevronDownIcon } from "@/components/ui/icon"
 import { IUser } from '@/types/userInterface';
-import Toast from 'react-native-simple-toast'
+import Toast from 'react-native-simple-toast';
+import { Input, InputField } from '@/components/ui/input';
 
 interface StepProps {
   data: IUser;
@@ -27,9 +28,7 @@ interface StepProps {
 }
 
 const Step3 = forwardRef(({ data, setData }: StepProps, ref) => {
-   const handleCityChange = (city: string) => {
-    setData({ ...data, city });
-  };
+ 
 
     useImperativeHandle(ref, () => ({
     validate: () => {
@@ -48,31 +47,17 @@ const Step3 = forwardRef(({ data, setData }: StepProps, ref) => {
       <View className="w-full rounded-md flex flex-col ">
         <FormControl
           size="lg"
-          // isDisabled={false}
-          // isReadOnly={false}
-          // isRequired={true}        
+                  
         >
           <View className='relative '>
               <FormControlLabel className='mt-6 '>
                 <FormControlLabelText className='text-md font-poppins'>City</FormControlLabelText>
               </FormControlLabel>
-              <Select onValueChange={handleCityChange} defaultValue={data.city} >
-                <SelectTrigger variant="outline" size="lg" className='border h-14 rounded-xl justify-between'>
-                  <SelectInput placeholder="Select option" />
-                  <SelectIcon className="text-xl mr-2" as={ChevronDownIcon} size='lg' />
-                </SelectTrigger>
-                <SelectPortal className='absolute bottom-[22rem]'>
-                  <SelectBackdrop />
-                  <SelectContent  >
-                    <SelectDragIndicatorWrapper>
-                      <SelectDragIndicator />
-                    </SelectDragIndicatorWrapper>
-                    <SelectItem className='h-14' label="Kathmandu" value="KTM" />
-                    <SelectItem className='h-14' label="Lalitpur" value="Lalitpur" />
-                    <SelectItem className='h-14' label="Bhaktpur" value="Bhaktpur"  />
-                  </SelectContent>
-                </SelectPortal>
-              </Select>
+              <Input
+              >
+                <InputField value={data.city} onChangeText={(text) => setData({...data, city:text})}
+                placeholder="Enter location here..." />
+              </Input>
           </View>    
         </FormControl>
 
