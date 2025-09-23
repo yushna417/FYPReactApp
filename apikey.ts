@@ -1,1 +1,1 @@
-export const BASE_URL = 'http://192.168.254.7:8000/api/';
+export const BASE_URL = 'http://192.168.254.5:8000/api/';
