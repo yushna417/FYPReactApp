@@ -2,13 +2,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Button } from "react-native";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { Input, InputField, InputSlot } from "../ui/input";
-import { FontAwesome5, MaterialIcons, Ionicons} from "@expo/vector-icons";
+import { FontAwesome6, MaterialIcons, Ionicons, Feather, SimpleLineIcons, Entypo} from "@expo/vector-icons";
 import { IVeg } from "@/types/vegetableInterface";
 import { ReceivePrice } from "@/types/dailyPriceInterface";
 import { VegetableService } from "@/api/vegetableService";
 import VegetableSuggestions from "./vegetableSuggestion";
-import { Grid, GridItem } from "../ui/grid";
-
+import { Divider } from "../ui/divider";
+import { Box } from "../ui/box";
+import { IDailyPrice } from "@/types/dailyPriceInterface";
 
 
 interface OrderActionSheetProps {
@@ -24,7 +25,28 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
   const [selectedVegetable, setSelectedVegetable] = useState<IVeg | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [todayVeg, setTodayVeg] = useState<ReceivePrice[]>([])
+  const [todayVeg, setTodayVeg] = useState<ReceivePrice[]>([]);
+  const [latestPrice, setLatestPrice] = useState<IDailyPrice>();
+  const [price, setPrice] = useState<string>("");
+  const [unit, setUnit] = useState<string>("1");
+  const minPrice = latestPrice?.min_price ?? 0;
+
+  const handleIncrease = () => {
+    setPrice((prev) => {
+      const num = parseInt(prev) || minPrice;
+      return (num + 5).toString();
+    });
+  };
+
+  const handleDecrease = () => {
+    setPrice((prev) => {
+      const num = parseInt(prev) || minPrice;
+      const newVal = num - 5 >= minPrice ? num - 5 : minPrice;
+      return newVal.toString();
+    });
+  };
+
+
   
   useEffect(() => {
     const loadVegetables = async() => {
@@ -58,6 +80,30 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
     setFilteredVegetables(filtered);
     setShowSuggestions(true);
   }, [query, vegetables, selectedVegetable]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        if (!selectedVegetable) return; 
+        const data = await VegetableService.getDailyPrices(selectedVegetable.id);
+        const sortedData = data.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        );
+        setLatestPrice(sortedData[0] || null);
+      } catch (error) {
+        console.error("Failed to fetch prices:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadData();
+  }, [selectedVegetable]); 
+
+  useEffect(() => {
+    if (latestPrice?.avg_price) {
+      setPrice(latestPrice.avg_price.toString());
+    }
+  }, [latestPrice]);
 
   const handleSelect = (veg: IVeg) => {
       setSelectedVegetable(veg);
@@ -93,11 +139,11 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
       style={{ backgroundColor: "black" }} // ensures black overlay
     />
   )} >
-        <BottomSheetView className="bg-white h-full z-10 px-2"> 
+        <BottomSheetView className="bg-gray-100 h-full z-10 "> 
           <MaterialIcons name="close" size={24} color="#253a6c" onPress={close} className="self-end"/>
           <View className="">
             <View className="w-full flex flex-row justify-center items-baseline gap-x-4">
-              <FontAwesome5 name="shopping-basket" size={24} color="black" />   
+              <Feather name="shopping-bag" size={24} color="#1f2937" />
               <Text className="text-gray-800 font-poppins font-bold text-2xl  text-center flex ">Place an Order</Text>
             </View>
             <View className="px-5 py-8 bg-MainTheme mt-3 mb-14">
@@ -118,14 +164,89 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
                 <VegetableSuggestions showSuggestions={showSuggestions} query={query} 
                 filteredVegetables={filteredVegetables} onSelect={handleSelect}/>
             </View>
-            <Text className="font-poppins text-lg font-semibold text-center">
-              this Price - to that Price
-            </Text>
-            <View className="mt-10 flex flex-row gap-x-5 px-5 ">
-              <View className="flex flex-1 p-2 border">
+
+            {hasSelectedVegetable && isVegetableAvailable && (              
+            <View className="mt-5 flex flex-row gap-x-5 px-5 ">
+              <View className="flex flex-1 ">
+                <Text className="font-bold font-poppins text-MainTheme text-xl">
+                  Offer Price
+                </Text>
+                <Input className="rounded-xl py-2 px-1 mt-3 h-14 bg-white" style={{ boxShadow: " 3px 3px 3px #d1d5db",}}>
+                
+                <InputField placeholder="₨ 0"  className="text-xl font-poppins" keyboardType="numeric"
+                value={price} onChangeText={(text) => { let num = parseInt(text) || 0; setPrice(num < minPrice ? minPrice.toString() : num.toString());
+    }} />
+
+                  <InputSlot  className='mr-1' onPress={handleDecrease}>
+                    <Entypo name="minus" size={24} color="#253a6c" />
+                  </InputSlot>
+
+                  <Divider className="bg-gray-300 my-4 mx-3 font-bold" orientation="vertical" />
+
+                  <InputSlot  className='mr-1' onPress={handleIncrease}>
+                    <Entypo name="plus" size={24} color="#253a6c" />
+                  </InputSlot>
+                                   
+              </Input>
+              <Text className="px-3 pt-1 text-base text-MainTheme/70 "> Price Range: {latestPrice?.min_price} - {latestPrice?.max_price}</Text> 
               </View>
-              <View className="flex w-1/3 p-2 border"></View>
+                <View className="flex w-1/3 ">
+                  <Text className="font-bold font-poppins text-MainTheme text-xl">
+                    {selectedVegetable.unit !== "Per Dozen" ? "Quantity /" : ""}{" "}
+                    <Text>{selectedVegetable.unit}</Text>
+                  </Text>
+
+                  <Input
+                    className="rounded-xl px-2 mt-3 h-14 py-2 bg-white flex flex-row items-center justify-between"
+                    style={{ boxShadow: "3px 3px 3px #d1d5db" }}
+                  >
+                    <InputField
+                      placeholder="0"
+                      className="text-xl ml-2 flex-1"
+                      value={unit}
+                      onChangeText={setUnit}
+                      keyboardType="numeric"
+                    />
+
+                     <Divider orientation="vertical" className="bg-gray-300 " />
+
+                    {/* Up/Down buttons */}
+                    <View className="flex flex-col ml-2">
+                      <Entypo
+                        name="chevron-up"
+                        size={22}
+                        color="#253a6c"
+                       onPress={() => {
+                        const current = parseFloat(unit) || 0;
+                        const newVal = current + 0.5;
+                        setUnit(newVal.toString());
+                      }}
+                      />
+                      <Entypo
+                        name="chevron-down"
+                        size={22}
+                        color="#253a6c"
+                        onPress={() => {
+                          const current = parseFloat(unit) || 0;
+                          const newVal = Math.max(0.5, current - 0.5); // min 0.5
+                          setUnit(newVal.toString());
+                        }}
+                      />
+                    </View>
+                  </Input>
+                </View>
+
             </View>
+            )}
+
+              {hasSelectedVegetable && !isVegetableAvailable && !isLoading && (
+                <Box className="items-center justify-center py-12 px-5">
+                  <Text className="text-gray-500 text-center">
+                    The given vegetable is currently not available in the market. 
+                  </Text>
+                </Box>
+              )}
+            
           </View>
         </BottomSheetView>
       </BottomSheet>
