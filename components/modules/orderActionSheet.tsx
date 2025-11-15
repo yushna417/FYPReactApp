@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Button } from "react-native";
+import { View, Text, Button, TouchableOpacity, Pressable } from "react-native";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from "@gorhom/bottom-sheet";
 import { Input, InputField, InputSlot } from "../ui/input";
-import { FontAwesome6, MaterialIcons, Ionicons, Feather, SimpleLineIcons, Entypo} from "@expo/vector-icons";
+import { FontAwesome6, MaterialIcons, Ionicons, Feather, SimpleLineIcons, Entypo, MaterialCommunityIcons} from "@expo/vector-icons";
 import { IVeg } from "@/types/vegetableInterface";
 import { ReceivePrice } from "@/types/dailyPriceInterface";
 import { VegetableService } from "@/api/vegetableService";
@@ -18,7 +18,7 @@ interface OrderActionSheetProps {
 }
 
 const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) => {
-  const snapPoints = useMemo(() => ["25%", "50%", "90%"], []);
+  const snapPoints = useMemo(() => [ "50%", "90%"], []);
   const [vegetables, setVegetables] = useState<IVeg[]>([]);
   const [query, setQuery] = useState('');
   const [filteredVegetables, setFilteredVegetables] = useState<IVeg[]>([]);
@@ -45,8 +45,6 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
       return newVal.toString();
     });
   };
-
-
   
   useEffect(() => {
     const loadVegetables = async() => {
@@ -128,7 +126,7 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
   
   
   return (
-      <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={1}  backdropComponent={(props) => (
+      <BottomSheet ref={sheetRef} snapPoints={snapPoints} index={-1}  backdropComponent={(props) => (
     <BottomSheetBackdrop
       {...props}
       disappearsOnIndex={-1}    // hides backdrop when sheet is closed
@@ -140,7 +138,7 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
     />
   )} >
         <BottomSheetView className="bg-gray-100 h-full z-10 "> 
-          <MaterialIcons name="close" size={24} color="#253a6c" onPress={close} className="self-end"/>
+          <MaterialIcons name="close" size={24} color="#253a6c" onPress={close} className="self-end mr-5"/>
           <View className="">
             <View className="w-full flex flex-row justify-center items-baseline gap-x-4">
               <Feather name="shopping-bag" size={24} color="#1f2937" />
@@ -165,78 +163,109 @@ const OrderActionSheet: React.FC<OrderActionSheetProps> = ({ sheetRef, close }) 
                 filteredVegetables={filteredVegetables} onSelect={handleSelect}/>
             </View>
 
-            {hasSelectedVegetable && isVegetableAvailable && (              
-            <View className="mt-5 flex flex-row gap-x-5 px-5 ">
-              <View className="flex flex-1 ">
-                <Text className="font-bold font-poppins text-MainTheme text-xl">
-                  Offer Price
-                </Text>
-                <Input className="rounded-xl py-2 px-1 mt-3 h-14 bg-white" style={{ boxShadow: " 3px 3px 3px #d1d5db",}}>
-                
-                <InputField placeholder="₨ 0"  className="text-xl font-poppins" keyboardType="numeric"
-                value={price} onChangeText={(text) => { let num = parseInt(text) || 0; setPrice(num < minPrice ? minPrice.toString() : num.toString());
-    }} />
-
-                  <InputSlot  className='mr-1' onPress={handleDecrease}>
-                    <Entypo name="minus" size={24} color="#253a6c" />
-                  </InputSlot>
-
-                  <Divider className="bg-gray-300 my-4 mx-3 font-bold" orientation="vertical" />
-
-                  <InputSlot  className='mr-1' onPress={handleIncrease}>
-                    <Entypo name="plus" size={24} color="#253a6c" />
-                  </InputSlot>
-                                   
-              </Input>
-              <Text className="px-3 pt-1 text-base text-MainTheme/70 "> Price Range: {latestPrice?.min_price} - {latestPrice?.max_price}</Text> 
-              </View>
-                <View className="flex w-1/3 ">
+            {hasSelectedVegetable && isVegetableAvailable && (  
+            <View className="px-5 flex flex-col gap-y-7 mt-2">
+              <View className="flex flex-row gap-x-5  ">
+                <View className="flex flex-1 ">
                   <Text className="font-bold font-poppins text-MainTheme text-xl">
-                    {selectedVegetable.unit !== "Per Dozen" ? "Quantity /" : ""}{" "}
-                    <Text>{selectedVegetable.unit}</Text>
+                    Offer Price
                   </Text>
+                  <View className="">
+                      <Input className="rounded-xl py-2 px-1 mt-3 h-14 bg-white" style={{ boxShadow: " 3px 3px 3px #d1d5db",}}>
+                    
+                    <InputField placeholder="₨ 0"  className="text-xl font-poppins" keyboardType="numeric"
+                    value={price} onChangeText={(text) => { let num = parseInt(text) || 0; setPrice(num < minPrice ? minPrice.toString() : num.toString());}} />
 
-                  <Input
-                    className="rounded-xl px-2 mt-3 h-14 py-2 bg-white flex flex-row items-center justify-between"
-                    style={{ boxShadow: "3px 3px 3px #d1d5db" }}
-                  >
-                    <InputField
-                      placeholder="0"
-                      className="text-xl ml-2 flex-1"
-                      value={unit}
-                      onChangeText={setUnit}
-                      keyboardType="numeric"
-                    />
+                      <InputSlot  className='mr-1' onPress={handleDecrease}>
+                        {/* <Entypo name="squared-minus" size={35} color="#253a6c" /> */}
+                        <MaterialCommunityIcons name="minus" size={28} color="#253a6c" />
+                      </InputSlot>
 
-                     <Divider orientation="vertical" className="bg-gray-300 " />
+                      <Divider className="bg-gray-300 my-4 mx-2 font-bold" orientation="vertical" />
 
-                    {/* Up/Down buttons */}
-                    <View className="flex flex-col ml-2">
-                      <Entypo
-                        name="chevron-up"
-                        size={22}
-                        color="#253a6c"
-                       onPress={() => {
-                        const current = parseFloat(unit) || 0;
-                        const newVal = current + 0.5;
-                        setUnit(newVal.toString());
-                      }}
-                      />
-                      <Entypo
-                        name="chevron-down"
-                        size={22}
-                        color="#253a6c"
-                        onPress={() => {
-                          const current = parseFloat(unit) || 0;
-                          const newVal = Math.max(0.5, current - 0.5); // min 0.5
-                          setUnit(newVal.toString());
-                        }}
-                      />
-                    </View>
-                  </Input>
+                      <InputSlot  className='mr-1' onPress={handleIncrease}>
+                        {/* <Entypo name="squared-plus" size={28} color="#253a6c" /> */}
+                        <MaterialCommunityIcons name="plus" size={28} color="#253a6c" />
+                      </InputSlot>
+                                      
+                    </Input>
+                    
+                  </View>
+                  
+                <Text className="ps-2 pt-3 text-base text-MainTheme/70 "> Price Range: {latestPrice?.min_price} - {latestPrice?.max_price}</Text> 
                 </View>
 
-            </View>
+                <View className="flex w-1/3 ">
+                      <Text className="font-bold font-poppins text-MainTheme text-xl">
+                        {selectedVegetable.unit !== "Per Dozen" ? "Quantity /" : ""}{" "}
+                        <Text>{selectedVegetable.unit}</Text>
+                      </Text>
+
+                      <Input
+                        className="rounded-xl px-2 mt-3 h-14 py-2 bg-white flex flex-row items-center justify-between"
+                        style={{ boxShadow: "3px 3px 3px #d1d5db" }}
+                      >
+                        <InputField
+                          placeholder="0"
+                          className="text-xl ml-2 flex-1"
+                          value={unit}
+                          onChangeText={setUnit}
+                          keyboardType="numeric"
+                        />
+
+                        <Divider orientation="vertical" className="bg-gray-300 " />
+
+                        {/* Up/Down buttons */}
+                        <View className="flex flex-col ml-2">
+                          <Entypo
+                            name="chevron-up"
+                            size={22}
+                            color="#253a6c"
+                          onPress={() => {
+                            const current = parseFloat(unit) || 0;
+                            const newVal = current + 0.5;
+                            setUnit(newVal.toString());
+                          }}
+                          />
+                          <Entypo
+                            name="chevron-down"
+                            size={22}
+                            color="#253a6c"
+                            onPress={() => {
+                              const current = parseFloat(unit) || 0;
+                              const newVal = Math.max(0.5, current - 0.5); // min 0.5
+                              setUnit(newVal.toString());
+                            }}
+                          />
+                        </View>
+                      </Input>
+                </View>
+
+              </View>
+
+              <View>
+                <Text className="font-bold font-poppins text-MainTheme text-xl">
+                  Your location
+                </Text>
+                <Input className="rounded-xl px-2 mt-3 h-14 bg-white" style={{ boxShadow: " 3px 3px 3px #d1d5db",}}>
+                  <InputField placeholder="Enter your location" className="text-md ml-2" 
+                  />
+
+                  {query.length > 0 && (
+                    <InputSlot  className='mr-1' onPress={clearSelection} >
+                      <Ionicons name='close-outline' size={20} color="gray" />
+                    </InputSlot>
+                  )}                     
+                </Input>  
+              </View>
+
+              <Pressable  className="w-full justify-center flex flex-row items-center mt-5 rounded-lg h-16 bg-[#243c6b]">
+                <Text className='text-xl text-white font-bold' disabled={isLoading}>
+                  Order Now
+                </Text>
+              </Pressable>
+            </View>            
+           
             )}
 
               {hasSelectedVegetable && !isVegetableAvailable && !isLoading && (

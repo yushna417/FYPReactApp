@@ -6,18 +6,6 @@ import {
 } from "@/components/ui/form-control"
 // import { VStack } from "@/components/ui/vstack"
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { 
-  Select,
-  SelectTrigger, 
-  SelectInput, 
-  SelectIcon, 
-  SelectPortal, 
-  SelectBackdrop, 
-  SelectContent, 
-  SelectDragIndicatorWrapper, 
-  SelectDragIndicator, 
-  SelectItem } from '@/components/ui/select';
-  import { ChevronDownIcon } from "@/components/ui/icon"
 import { IUser } from '@/types/userInterface';
 import Toast from 'react-native-simple-toast';
 import { Input, InputField } from '@/components/ui/input';
@@ -28,7 +16,6 @@ interface StepProps {
 }
 
 const Step3 = forwardRef(({ data, setData }: StepProps, ref) => {
- 
 
     useImperativeHandle(ref, () => ({
     validate: () => {
@@ -53,7 +40,7 @@ const Step3 = forwardRef(({ data, setData }: StepProps, ref) => {
               <FormControlLabel className='mt-6 '>
                 <FormControlLabelText className='text-md font-poppins'>City</FormControlLabelText>
               </FormControlLabel>
-              <Input
+              <Input className="rounded-xl px-4 h-14 " 
               >
                 <InputField value={data.city} onChangeText={(text) => setData({...data, city:text})}
                 placeholder="Enter location here..." />
@@ -67,4 +54,3 @@ const Step3 = forwardRef(({ data, setData }: StepProps, ref) => {
 });
 
 export default Step3;
-

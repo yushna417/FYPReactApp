@@ -4,10 +4,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { IDailyPrice } from '@/types/dailyPriceInterface';
 import { VegetableService } from '@/api/vegetableService';
 import { Box } from '../ui/box';
-// import { HStack } from '../ui/hstack';
-import { AntDesign, FontAwesome6, Ionicons, MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
-// import { VStack } from '../ui/vstack';
-import { Divider } from '../ui/divider';
+import { AntDesign,  } from '@expo/vector-icons';
 
 interface Props {
   vegetableId: number;

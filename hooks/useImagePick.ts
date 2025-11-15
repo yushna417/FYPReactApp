@@ -25,6 +25,11 @@ export const pickFromGallery = async () => {
     quality: 0.8,
   });
 
+   if (!result.canceled) {
+    const imageUri = result.assets[0].uri;
+    await uploadImage(imageUri);
+  }
+
   
 };
 
@@ -44,5 +49,9 @@ export const takePhoto = async () => {
     quality: 0.8,
   });
 
+  if (!result.canceled) {
+    const imageUri = result.assets[0].uri;
+    await uploadImage(imageUri);
+  }
   
 };

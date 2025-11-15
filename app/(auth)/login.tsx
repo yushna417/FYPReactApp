@@ -165,8 +165,6 @@ const login = () => {
           disabled={isLoading}>
            {isLoading ? 'Logging in...' : 'Login'}
           </Text>
-          
-          
         </TouchableOpacity>
 
         <Text className='mt-4 font-poppins text-gray-400'>I am a new user. <Text className='text-[#253a6c]'
